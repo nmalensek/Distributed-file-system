@@ -1,11 +1,14 @@
 package cs555.dfs.node;
 
 import cs555.dfs.messages.Event;
+import cs555.dfs.transport.TCPReceiverThread;
+import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkServer implements Node {
 
@@ -16,8 +19,11 @@ public class ChunkServer implements Node {
     private static long freeSpace;
     public static String storageDirectory = "/tmp/";
     private TCPServerThread serverThread;
+    private TCPSender sender = new TCPSender();
+    private ConcurrentHashMap<String, String> filesResponsibleFor = new ConcurrentHashMap<>();
+    private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
 
-    public ChunkServer() {
+    public ChunkServer() throws IOException {
 
     }
 
@@ -54,8 +60,12 @@ public class ChunkServer implements Node {
 
 
     public static void main(String[] args) {
-        controllerHost = args[0];
-        controllerPort = Integer.parseInt(args[1]);
+        try {
+            controllerHost = args[0];
+            controllerPort = Integer.parseInt(args[1]);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Usage [controller host] [controller port]");
+        }
 
     }
 

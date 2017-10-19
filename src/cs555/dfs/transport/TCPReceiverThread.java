@@ -43,7 +43,7 @@ public class TCPReceiverThread extends Thread implements Protocol {
 
             } catch (IOException ioe) {
 //                ioe.printStackTrace();
-                communicationSocket = null;
+//                communicationSocket = null;
 //                System.out.println("A node left the overlay");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
