@@ -8,6 +8,9 @@ import cs555.dfs.transport.TCPServerThread;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionTest implements Node {
 
@@ -18,16 +21,32 @@ public class ConnectionTest implements Node {
         TCPServerThread serverThread = new TCPServerThread(this, 51000);
     }
 
-    private void test() throws InterruptedException {
+    private void test() throws InterruptedException, IOException {
+        while (true) {
+            try{
+                Thread.sleep(500);
+                NodeInformation nodeInformation = new NodeInformation();
+                nodeInformation.setNodeInfo("127.0.0.1:51000");
+                nodeInformation.setUsableSpace(243234234234L);
+                System.out.println("sent a message");
+                sender.send(testSocket, nodeInformation.getBytes());
+            } catch (IOException | InterruptedException e) {
+                System.out.println("Could not connect..");
+                testSocket.close();
+                tryToReconnect();
+            }
+        }
+    }
 
-        try{
-            Thread.sleep(500);
-            NodeInformation nodeInformation = new NodeInformation();
-            nodeInformation.setNodeInfo("127.0.0.1:51000");
-            nodeInformation.setUsableSpace(243234234234L);
-            sender.send(testSocket, nodeInformation.getBytes());
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Could not connect..");
+    private void tryToReconnect() {
+        try {
+            System.out.println("Trying to reconnect...");
+            testSocket = new Socket("127.0.0.1", 50000);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+//            e.printStackTrace();
+            System.out.println("Reconnect failed, server's not back up. Retrying...");
         }
     }
 
@@ -46,5 +65,15 @@ public class ConnectionTest implements Node {
     @Override
     public void processText(String text) throws IOException {
 
+    }
+
+    @Override
+    public List<String> getNewChunks() {
+        return null;
+    }
+
+    @Override
+    public ConcurrentHashMap<String, String> getAllChunks() {
+        return null;
     }
 }

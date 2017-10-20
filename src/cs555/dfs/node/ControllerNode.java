@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ControllerNode implements Node {
@@ -39,4 +40,8 @@ public class ControllerNode implements Node {
 
     @Override
     public void processText(String text) throws IOException { }
+    @Override
+    public List<String> getNewChunks() { return null; }
+    @Override
+    public ConcurrentHashMap<String, String> getAllChunks() { return null; }
 }

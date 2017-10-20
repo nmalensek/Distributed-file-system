@@ -1,6 +1,8 @@
 package cs555.dfs.transport;
 
 import cs555.dfs.eventfactory.EventFactory;
+import cs555.dfs.messages.Event;
+import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.Protocol;
 import cs555.dfs.node.Node;
 
@@ -42,9 +44,9 @@ public class TCPReceiverThread extends Thread implements Protocol {
                 determineMessageType(data);
 
             } catch (IOException ioe) {
-//                ioe.printStackTrace();
-//                communicationSocket = null;
-//                System.out.println("A node left the overlay");
+                ioe.printStackTrace();
+                communicationSocket = null;
+                System.out.println("A node left the overlay");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -67,13 +69,14 @@ public class TCPReceiverThread extends Thread implements Protocol {
         int messageType = dataInputStream.readInt();
         dataInputStream.close();
 
-//        switch (messageType) {
-//            case ENTER_OVERLAY:
-//                Event<NodeInformation> nodeInformationEvent =
-//                        eventFactory.nodeInformationEvent(marshalledBytes);
-//                node.onEvent(nodeInformationEvent, communicationSocket);
-//            default:
-//                System.out.println("Something went horribly wrong, please restart.");
-//        }
+        switch (messageType) {
+            case NODE_INFORMATION:
+                Event<NodeInformation> nodeInformationEvent =
+                        eventFactory.nodeInformationEvent(marshalledBytes);
+                node.onEvent(nodeInformationEvent, communicationSocket);
+                break;
+            default:
+                System.out.println("Something went horribly wrong, please restart.");
+        }
     }
 }

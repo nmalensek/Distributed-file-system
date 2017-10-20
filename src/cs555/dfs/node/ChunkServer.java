@@ -8,6 +8,8 @@ import cs555.dfs.transport.TCPServerThread;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkServer implements Node {
@@ -20,7 +22,8 @@ public class ChunkServer implements Node {
     public static String storageDirectory = "/tmp/";
     private TCPServerThread serverThread;
     private TCPSender sender = new TCPSender();
-    private ConcurrentHashMap<String, String> filesResponsibleFor = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, String> chunksResponsibleFor = new ConcurrentHashMap<>();
+    private List<String> newChunksResponsibleFor = new ArrayList<>();
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
 
     public ChunkServer() throws IOException {
@@ -57,7 +60,15 @@ public class ChunkServer implements Node {
 
     }
 
+    @Override
+    public List<String> getNewChunks() {
+        return newChunksResponsibleFor;
+    }
 
+    @Override
+    public ConcurrentHashMap<String, String> getAllChunks() {
+        return chunksResponsibleFor;
+    }
 
     public static void main(String[] args) {
         try {

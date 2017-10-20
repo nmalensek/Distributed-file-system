@@ -1,6 +1,9 @@
 package cs555.dfs.eventfactory;
 
 
+import cs555.dfs.messages.Event;
+import cs555.dfs.messages.NodeInformation;
+
 import java.io.IOException;
 
 public final class EventFactory {
@@ -16,13 +19,13 @@ public final class EventFactory {
     public static EventFactory getInstance() {
         return instance;
     }
-//
-//    public static Event<NodeInformation> nodeInformationEvent(
-//            byte[] marshalledBytes) throws IOException {
-//        NodeInformation nodeInformation = new NodeInformation();
-//        nodeInformation.readMessage(marshalledBytes);
-//        return nodeInformation;
-//    }
+
+    public static Event<NodeInformation> nodeInformationEvent(
+            byte[] marshalledBytes) throws IOException {
+        NodeInformation nodeInformation = new NodeInformation();
+        nodeInformation.readMessage(marshalledBytes);
+        return nodeInformation;
+    }
 
 
 }
