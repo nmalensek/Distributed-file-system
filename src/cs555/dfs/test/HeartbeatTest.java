@@ -17,8 +17,6 @@ public class HeartbeatTest implements Node{
 
 
     private void testHeartbeats() {
-        new Thread(new MinorHeartbeatThread(testHost, testPort, 200, this)).start();
-        new Thread(new MajorHeartbeatThread(testHost, testPort, 350, this)).start();
     }
 
     public static void main(String[] args) {
@@ -36,13 +34,4 @@ public class HeartbeatTest implements Node{
 
     }
 
-    @Override
-    public List<String> getNewChunks() {
-        return null;
-    }
-
-    @Override
-    public ConcurrentHashMap<String, String> getAllChunks() {
-        return null;
-    }
 }

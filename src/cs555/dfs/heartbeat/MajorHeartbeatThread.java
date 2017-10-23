@@ -1,14 +1,17 @@
 package cs555.dfs.heartbeat;
 
-import cs555.dfs.node.Node;
+import cs555.dfs.node.ChunkServer;
 
-public class MajorHeartbeatThread extends HeartbeatThread implements Runnable{
+public class MajorHeartbeatThread extends Thread {
 
     private int heartbeatInterval;
 
-    public MajorHeartbeatThread(String controllerHost, int controllerPort, int heartbeatInterval, Node owner) {
-        super(controllerHost, controllerPort, heartbeatInterval, owner);
+    public MajorHeartbeatThread(String controllerHost, int controllerPort, int heartbeatInterval, ChunkServer owner) {
         this.heartbeatInterval = heartbeatInterval;
+    }
+
+    public void sendMajorHeartbeat() {
+
     }
 
     @Override

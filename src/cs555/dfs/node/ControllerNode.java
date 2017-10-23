@@ -16,6 +16,7 @@ public class ControllerNode implements Node {
     private static int controllerPort;
     private static String controllerHost;
     private TCPSender controllerSender = new TCPSender();
+    private ConcurrentHashMap<String, List<String>> chunkStorageMap = new ConcurrentHashMap<>(); //<chunkname, list<nodeID>>
 
 
     private void startup() {
@@ -40,8 +41,4 @@ public class ControllerNode implements Node {
 
     @Override
     public void processText(String text) throws IOException { }
-    @Override
-    public List<String> getNewChunks() { return null; }
-    @Override
-    public ConcurrentHashMap<String, String> getAllChunks() { return null; }
 }

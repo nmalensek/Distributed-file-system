@@ -7,7 +7,9 @@ import cs555.dfs.transport.TCPServerThread;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,12 +19,13 @@ public class ChunkServer implements Node {
     private static int controllerPort;
     private static String controllerHost;
     private int thisNodePort;
+    private static String thisNodeHost;
     private static int sliceSize = 8192; //8kb slices
     private static long freeSpace;
     public static String storageDirectory = "/tmp/";
     private TCPServerThread serverThread;
     private TCPSender sender = new TCPSender();
-    private ConcurrentHashMap<String, String> chunksResponsibleFor = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, String> chunksResponsibleFor = new ConcurrentHashMap<>(); //chunkname, chunkname
     private List<String> newChunksResponsibleFor = new ArrayList<>();
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
 
@@ -60,22 +63,19 @@ public class ChunkServer implements Node {
 
     }
 
-    @Override
-    public List<String> getNewChunks() {
-        return newChunksResponsibleFor;
-    }
+    public ConcurrentHashMap<String, String> getChunksResponsibleFor() { return chunksResponsibleFor; }
 
-    @Override
-    public ConcurrentHashMap<String, String> getAllChunks() {
-        return chunksResponsibleFor;
-    }
+    public List<String> getNewChunksResponsibleFor() { return newChunksResponsibleFor; }
 
     public static void main(String[] args) {
         try {
             controllerHost = args[0];
             controllerPort = Integer.parseInt(args[1]);
+            thisNodeHost = Inet4Address.getLocalHost().getHostName();
         } catch (IndexOutOfBoundsException e) {
             System.out.println("Usage [controller host] [controller port]");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         }
 
     }

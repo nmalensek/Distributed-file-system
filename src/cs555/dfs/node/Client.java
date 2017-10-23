@@ -7,8 +7,6 @@ import cs555.dfs.transport.TCPServerThread;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Client implements Node {
 
@@ -66,9 +64,4 @@ public class Client implements Node {
             System.out.println("Usage: [controller host] [controller port]");
         }
     }
-
-    @Override
-    public List<String> getNewChunks() { return null; }
-    @Override
-    public ConcurrentHashMap<String, String> getAllChunks() { return null; }
 }

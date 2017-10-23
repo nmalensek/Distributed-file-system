@@ -11,7 +11,5 @@ public interface Node {
 
     void onEvent(Event event, Socket destinationSocket) throws IOException;
     void processText(String text) throws IOException;
-    List<String> getNewChunks();
-    ConcurrentHashMap<String, String> getAllChunks();
 
 }

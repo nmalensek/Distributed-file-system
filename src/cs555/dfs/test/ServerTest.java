@@ -40,16 +40,6 @@ public class ServerTest implements Node {
 
         }
 
-    @Override
-    public List<String> getNewChunks() {
-        return null;
-    }
-
-    @Override
-    public ConcurrentHashMap<String, String> getAllChunks() {
-        return null;
-    }
-
     public static void main(String[] args) {
             ServerTest testServer = new ServerTest();
         }

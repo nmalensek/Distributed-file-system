@@ -67,13 +67,4 @@ public class ConnectionTest implements Node {
 
     }
 
-    @Override
-    public List<String> getNewChunks() {
-        return null;
-    }
-
-    @Override
-    public ConcurrentHashMap<String, String> getAllChunks() {
-        return null;
-    }
 }
