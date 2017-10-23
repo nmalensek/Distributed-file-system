@@ -10,11 +10,12 @@ public class NodeRecord {
     private long usableSpace;
     private Socket nodeSocket;
 
-    public NodeRecord(String hostPort, Socket nodeSocket) throws IOException {
+    public NodeRecord(String hostPort, Socket nodeSocket, long usableSpace) throws IOException {
         this.host = hostPort.split(":")[0];
         this.port = Integer.parseInt(hostPort.split(":")[1]);
         this.identifier = hostPort;
         this.nodeSocket = nodeSocket;
+        this.usableSpace = usableSpace;
     }
 
     public String getHost() {

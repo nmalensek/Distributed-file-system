@@ -1,14 +1,10 @@
 package cs555.dfs.test;
 
-import cs555.dfs.heartbeat.MajorHeartbeatThread;
-import cs555.dfs.heartbeat.MinorHeartbeatThread;
 import cs555.dfs.messages.Event;
 import cs555.dfs.node.Node;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class HeartbeatTest implements Node{
 

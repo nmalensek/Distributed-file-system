@@ -3,19 +3,19 @@ package cs555.dfs.heartbeat;
 import cs555.dfs.node.ControllerNode;
 import cs555.dfs.transport.TCPSender;
 
-public class ServerHeartbeatThread extends Thread {
+import java.net.Socket;
 
-    private String controllerHost;
-    private int controllerPort;
+public class ControllerHeartbeatThread extends Thread {
+
     private int heartbeatInterval;
+    private Socket targetSocket;
     private ControllerNode owner;
     private TCPSender controllerMessager = new TCPSender();
 
-    public ServerHeartbeatThread(String targetHost, int targetPort, int heartbeatInterval, ControllerNode owner) {
-        this.controllerHost = targetHost;
-        this.controllerPort = targetPort;
+    public ControllerHeartbeatThread(Socket targetSocket, int heartbeatInterval, ControllerNode owner) {
         this.heartbeatInterval = heartbeatInterval;
         this.owner = owner;
+        this.targetSocket = targetSocket;
     }
 
     public void sendServerHeartbeat() {

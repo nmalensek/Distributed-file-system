@@ -1,9 +1,7 @@
 package cs555.dfs.transport;
 
 import cs555.dfs.eventfactory.EventFactory;
-import cs555.dfs.messages.Event;
-import cs555.dfs.messages.NodeInformation;
-import cs555.dfs.messages.Protocol;
+import cs555.dfs.messages.*;
 import cs555.dfs.node.Node;
 
 import java.io.BufferedInputStream;
@@ -74,6 +72,16 @@ public class TCPReceiverThread extends Thread implements Protocol {
                 Event<NodeInformation> nodeInformationEvent =
                         eventFactory.nodeInformationEvent(marshalledBytes);
                 node.onEvent(nodeInformationEvent, communicationSocket);
+                break;
+            case MINOR_HEARTBEAT:
+                Event<MinorHeartbeatMessage> minorHeartbeatMessageEvent =
+                        eventFactory.minorHeartbeatMessageEvent(marshalledBytes);
+                node.onEvent(minorHeartbeatMessageEvent, communicationSocket);
+                break;
+            case MAJOR_HEARTBEAT:
+                Event<MajorHeartbeatMessage> majorHeartbeatMessageEvent =
+                        eventFactory.majorHeartbeatMessageEvent(marshalledBytes);
+                node.onEvent(majorHeartbeatMessageEvent, communicationSocket);
                 break;
             default:
                 System.out.println("Something went horribly wrong, please restart.");

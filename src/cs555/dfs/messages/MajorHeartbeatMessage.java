@@ -2,22 +2,22 @@ package cs555.dfs.messages;
 
 import java.io.*;
 
-public class MinorHeartbeatMessage implements Protocol, Event {
-    private int messageType = MINOR_HEARTBEAT;
+public class MajorHeartbeatMessage implements Protocol, Event {
+    private int messageType = MAJOR_HEARTBEAT;
     private String nodeInfo;
-    private String newChunkData;
+    private String allChunkData;
     private Long freeSpace;
     private int numChunks;
 
-    public MinorHeartbeatMessage getType() {
+    public MajorHeartbeatMessage getType() {
         return this;
     }
 
     public String getNodeInfo() { return nodeInfo; }
     public void setNodeInfo(String nodeInfo) { this.nodeInfo = nodeInfo; }
 
-    public String getNewChunkData() { return newChunkData; }
-    public void setNewChunkData(String newChunkData) { this.newChunkData = newChunkData; }
+    public String getAllChunkData() { return allChunkData; }
+    public void setAllChunkData(String allChunkData) { this.allChunkData = allChunkData; }
 
     public Long getFreeSpace() { return freeSpace; }
     public void setFreeSpace(Long freeSpace) { this.freeSpace = freeSpace; }
@@ -44,7 +44,7 @@ public class MinorHeartbeatMessage implements Protocol, Event {
         dataOutputStream.writeInt(infoLength);
         dataOutputStream.write(infoBytes);
 
-        byte[] chunkDataBytes = newChunkData.getBytes();
+        byte[] chunkDataBytes = allChunkData.getBytes();
         int dataLength = chunkDataBytes.length;
         dataOutputStream.writeInt(dataLength);
         dataOutputStream.write(chunkDataBytes);
@@ -80,7 +80,7 @@ public class MinorHeartbeatMessage implements Protocol, Event {
         byte[] dataBytes = new byte[dataLength];
         dataInputStream.readFully(dataBytes);
 
-        newChunkData = new String(dataBytes);
+        allChunkData = new String(dataBytes);
 
         freeSpace = dataInputStream.readLong();
 

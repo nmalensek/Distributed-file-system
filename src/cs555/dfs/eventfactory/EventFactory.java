@@ -2,6 +2,8 @@ package cs555.dfs.eventfactory;
 
 
 import cs555.dfs.messages.Event;
+import cs555.dfs.messages.MajorHeartbeatMessage;
+import cs555.dfs.messages.MinorHeartbeatMessage;
 import cs555.dfs.messages.NodeInformation;
 
 import java.io.IOException;
@@ -25,6 +27,20 @@ public final class EventFactory {
         NodeInformation nodeInformation = new NodeInformation();
         nodeInformation.readMessage(marshalledBytes);
         return nodeInformation;
+    }
+
+    public static Event<MinorHeartbeatMessage> minorHeartbeatMessageEvent(
+            byte[] marshalledByes) throws IOException {
+        MinorHeartbeatMessage minorHeartbeatMessage = new MinorHeartbeatMessage();
+        minorHeartbeatMessage.readMessage(marshalledByes);
+        return minorHeartbeatMessage;
+    }
+
+    public static Event<MajorHeartbeatMessage> majorHeartbeatMessageEvent(
+            byte[] marshalledBytes) throws IOException {
+        MajorHeartbeatMessage majorHeartbeatMessage = new MajorHeartbeatMessage();
+        majorHeartbeatMessage.readMessage(marshalledBytes);
+        return majorHeartbeatMessage;
     }
 
 
