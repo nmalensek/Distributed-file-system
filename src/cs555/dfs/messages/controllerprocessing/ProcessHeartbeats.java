@@ -6,6 +6,7 @@ import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.RequestMajorHeartbeat;
 import cs555.dfs.node.NodeRecord;
 import cs555.dfs.transport.TCPSender;
+import cs555.dfs.util.ChunkMetadata;
 import cs555.dfs.util.Splitter;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class ProcessHeartbeats {
             String newChunkNames = heartbeat.getNewChunkData();
             String[] splitNames = newChunkNames.split(":");
             for (String name : splitNames) {
-                processChunkName(name, nodeChunksMap, heartbeat.getNodeInfo());
+                processChunkName(name, nodes, nodeChunksMap, heartbeat.getNodeInfo());
             }
         } else { //Controller is recovering, request major heartbeat
 
@@ -66,24 +67,40 @@ public class ProcessHeartbeats {
             nodes.put(majorHeartbeat.getNodeInfo(), nodeRecord);
         }
 
-        String allChunkNames = majorHeartbeat.getAllChunkData();
-        String[] splitChunkNames = allChunkNames.split(":");
-        for (String chunkName : splitChunkNames) {
-            processChunkName(chunkName, nodeChunksMap, majorHeartbeat.getNodeInfo());
+        String allChunkData = majorHeartbeat.getAllChunkData();
+        String[] splitChunkData = allChunkData.split(",");
+        for (String data : splitChunkData) {
+            processChunkName(data, nodes, nodeChunksMap, majorHeartbeat.getNodeInfo());
         }
     }
 
-    private synchronized void processChunkName(String chunkName, ConcurrentHashMap<String, List<String>> nodeChunks, String nodeID) {
-        if (nodeChunks.get(chunkName) == null) {
-            ArrayList<String> nodeList = new ArrayList<>();
-            nodeList.add(nodeID);
+    private synchronized void processChunkName(String chunkData,
+                                               ConcurrentHashMap<String, NodeRecord> nodes,
+                                               ConcurrentHashMap<String, List<String>> nodeChunks, String nodeID) {
+        try {
+            String[] splitChunkData = chunkData.split(":");
+            String chunkName = splitChunkData[0];
+            int versionNumber = Integer.parseInt(splitChunkData[1]);
+            String fileName = splitChunkData[2];
+            long lastUpdatedTime = Long.parseLong(splitChunkData[3]);
 
-            nodeChunks.put(chunkName, nodeList);
-        } else {
-            if (!nodeChunks.get(chunkName).contains(nodeID)) {
-                nodeChunks.get(chunkName).add(nodeID);
+            nodes.get(nodeID).getChunkInfo().put(
+                    chunkName, new ChunkMetadata(chunkName, versionNumber, fileName, lastUpdatedTime));
+
+            if (nodeChunks.get(chunkName) == null) {
+                ArrayList<String> nodeList = new ArrayList<>();
+                nodeList.add(nodeID);
+
+                nodeChunks.put(chunkName, nodeList);
+            } else {
+                if (!nodeChunks.get(chunkName).contains(nodeID)) {
+                    nodeChunks.get(chunkName).add(nodeID);
+                }
             }
+        } catch (ArrayIndexOutOfBoundsException ignored) {
+            //no chunkdata, chunk server hasn't stored any new chunks
         }
+
     }
 
     private synchronized NodeRecord registerNodeData(String nodeID, long freeSpace) throws IOException {

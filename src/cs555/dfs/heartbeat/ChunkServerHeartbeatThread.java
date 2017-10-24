@@ -6,23 +6,25 @@ import cs555.dfs.node.ChunkServer;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.util.ChunkMetadata;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkServerHeartbeatThread extends Thread {
 
-    private int heartbeatInterval = 30000;
-    private int majorHeartbeatInterval = 300000;
+    private int heartbeatInterval = 3000;
+    private int majorHeartbeatInterval = 30000;
     private int heartbeatCount = 0;
     private Socket controllerSocket;
     private ChunkServer owner;
     private TCPSender controllerMessage = new TCPSender();
+    private String metadataFilepath;
 
-    public ChunkServerHeartbeatThread(Socket controllerSocket, ChunkServer owner) {
+    public ChunkServerHeartbeatThread(Socket controllerSocket, ChunkServer owner, String metadataFilepath) {
         this.owner = owner;
         this.controllerSocket = controllerSocket;
+        this.metadataFilepath = metadataFilepath;
     }
 
     public void sendMinorHeartbeat() throws IOException {
@@ -58,12 +60,15 @@ public class ChunkServerHeartbeatThread extends Thread {
         }
     }
 
-    private String getAllChunks() {
-        ConcurrentHashMap<String, ChunkMetadata> allChunks = new ConcurrentHashMap<>(owner.getChunksResponsibleFor());
+    private String getAllChunks() throws IOException {
         StringBuilder allChunksBuilder = new StringBuilder();
+        File metadataFile = new File(metadataFilepath);
 
-        for (String chunkName : allChunks.keySet()) {
-            allChunksBuilder.append(allChunks.get(chunkName).toString()).append(",");
+        BufferedReader reader = new BufferedReader(new FileReader(metadataFile));
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            allChunksBuilder.append(line).append(",");
         }
 
         return allChunksBuilder.toString();

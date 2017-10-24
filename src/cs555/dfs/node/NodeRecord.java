@@ -13,7 +13,7 @@ public class NodeRecord {
     private long usableSpace;
     private Socket nodeSocket;
     private int numChunks;
-    private HashMap<String, ChunkMetadata> chunkInfo = new HashMap<>();
+    private HashMap<String, ChunkMetadata> chunkInfo = new HashMap<>(); //chunkname, data
 
     public NodeRecord(String hostPort, Socket nodeSocket, long usableSpace) throws IOException {
         this.host = hostPort.split(":")[0];
