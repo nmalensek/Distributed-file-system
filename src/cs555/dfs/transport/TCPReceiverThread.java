@@ -88,6 +88,10 @@ public class TCPReceiverThread extends Thread implements Protocol {
                         eventFactory.requestMajorHeartbeatEvent(marshalledBytes);
                 node.onEvent(requestMajorHeartbeatEvent, communicationSocket);
                 break;
+            case CHUNK:
+                break;
+            case FILE_INQUIRY:
+                break;
             default:
                 System.out.println("Something went horribly wrong, please restart.");
         }

@@ -47,5 +47,19 @@ public final class EventFactory {
         return requestMajorHeartbeat;
     }
 
+    public static Event<Chunk> chunkEvent(
+            byte[] marshalledBytes) throws IOException {
+        Chunk chunk = new Chunk();
+        chunk.readMessage(marshalledBytes);
+        return chunk;
+    }
+
+    public static Event<WriteFileInquiry> writeFileInquiryEvent(
+            byte[] marshalledBytes) throws IOException {
+        WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
+        writeFileInquiry.readMessage(marshalledBytes);
+        return writeFileInquiry;
+    }
+
 
 }
