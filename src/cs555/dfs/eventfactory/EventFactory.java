@@ -1,17 +1,14 @@
 package cs555.dfs.eventfactory;
 
 
-import cs555.dfs.messages.Event;
-import cs555.dfs.messages.MajorHeartbeatMessage;
-import cs555.dfs.messages.MinorHeartbeatMessage;
-import cs555.dfs.messages.NodeInformation;
+import cs555.dfs.messages.*;
 
 import java.io.IOException;
 
 public final class EventFactory {
 
     /**
-     * Class creates events based on the type of message received at a chord.messaging.node so the chord.messaging.node can respond accordingly.
+     * Class creates events based on the type of message received at a node so the node can respond accordingly.
      */
 
     private static final EventFactory instance = new EventFactory();
@@ -41,6 +38,13 @@ public final class EventFactory {
         MajorHeartbeatMessage majorHeartbeatMessage = new MajorHeartbeatMessage();
         majorHeartbeatMessage.readMessage(marshalledBytes);
         return majorHeartbeatMessage;
+    }
+
+    public static Event<RequestMajorHeartbeat> requestMajorHeartbeatEvent(
+            byte[] marshalledBytes) throws IOException {
+        RequestMajorHeartbeat requestMajorHeartbeat = new RequestMajorHeartbeat();
+        requestMajorHeartbeat.readMessage(marshalledBytes);
+        return requestMajorHeartbeat;
     }
 
 

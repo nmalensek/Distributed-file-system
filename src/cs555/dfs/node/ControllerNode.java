@@ -4,7 +4,7 @@ import cs555.dfs.messages.Event;
 import cs555.dfs.messages.MajorHeartbeatMessage;
 import cs555.dfs.messages.MinorHeartbeatMessage;
 import cs555.dfs.messages.NodeInformation;
-import cs555.dfs.messages.controllerprocessing.ProcessRegistration;
+import cs555.dfs.messages.controllerprocessing.ProcessHeartbeats;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 
@@ -22,6 +22,7 @@ public class ControllerNode implements Node {
     private TCPSender controllerSender = new TCPSender();
     private ConcurrentHashMap<String, List<String>> chunkStorageMap = new ConcurrentHashMap<>(); //<chunkname, list<nodeID>>
     private ConcurrentHashMap<String, NodeRecord> nodesInOverlay = new ConcurrentHashMap<>(); //<nodeID, node data>
+    private ProcessHeartbeats processHeartbeats = new ProcessHeartbeats();
 
 
     private void startup() {
@@ -33,11 +34,12 @@ public class ControllerNode implements Node {
     public void onEvent(Event event, Socket destinationSocket) throws IOException {
         if (event instanceof NodeInformation) {
             System.out.println("got a node information");
-            ProcessRegistration processRegistration = new ProcessRegistration();
-            processRegistration.logNewEntry(nodesInOverlay, (NodeInformation) event);
+            processHeartbeats.logNewEntry(nodesInOverlay, (NodeInformation) event);
         } else if (event instanceof MinorHeartbeatMessage) {
+            processHeartbeats.processMinorHeartbeat(chunkStorageMap, nodesInOverlay, (MinorHeartbeatMessage) event);
             System.out.println("got a minor heartbeat at " + System.currentTimeMillis());
         } else if (event instanceof MajorHeartbeatMessage) {
+            processHeartbeats.processMajorHeartbeat(chunkStorageMap, nodesInOverlay, (MajorHeartbeatMessage) event);
             System.out.println("got a major heartbeat at " + System.currentTimeMillis());
         }
     }

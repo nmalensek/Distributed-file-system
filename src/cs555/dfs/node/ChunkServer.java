@@ -3,6 +3,7 @@ package cs555.dfs.node;
 import cs555.dfs.heartbeat.ChunkServerHeartbeatThread;
 import cs555.dfs.messages.Event;
 import cs555.dfs.messages.NodeInformation;
+import cs555.dfs.messages.RequestMajorHeartbeat;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 
@@ -28,6 +29,7 @@ public class ChunkServer implements Node {
     private ConcurrentHashMap<String, String> chunksResponsibleFor = new ConcurrentHashMap<>(); //chunkname, chunkname
     private List<String> newChunksResponsibleFor = new ArrayList<>();
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
+    ChunkServerHeartbeatThread chunkServerHeartbeatThread;
 
     public ChunkServer() throws IOException {
 
@@ -64,7 +66,7 @@ public class ChunkServer implements Node {
     }
 
     private void startHeartbeats() throws IOException {
-        ChunkServerHeartbeatThread chunkServerHeartbeatThread = new ChunkServerHeartbeatThread(controllerNodeSocket, this);
+        chunkServerHeartbeatThread = new ChunkServerHeartbeatThread(controllerNodeSocket, this);
         chunkServerHeartbeatThread.start();
         //register with controller
         NodeInformation nodeInformation = new NodeInformation();
@@ -77,6 +79,8 @@ public class ChunkServer implements Node {
     public void onEvent(Event event, Socket destinationSocket) throws IOException {
         if (event instanceof NodeInformation) {
             System.out.println("got a registration reply");
+        } else if (event instanceof RequestMajorHeartbeat) {
+            chunkServerHeartbeatThread.sendMajorHeartbeat();
         }
 
     }

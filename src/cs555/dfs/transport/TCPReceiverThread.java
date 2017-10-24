@@ -83,6 +83,11 @@ public class TCPReceiverThread extends Thread implements Protocol {
                         eventFactory.majorHeartbeatMessageEvent(marshalledBytes);
                 node.onEvent(majorHeartbeatMessageEvent, communicationSocket);
                 break;
+            case REQUEST_MAJOR_HEARTBEAT:
+                Event<RequestMajorHeartbeat> requestMajorHeartbeatEvent =
+                        eventFactory.requestMajorHeartbeatEvent(marshalledBytes);
+                node.onEvent(requestMajorHeartbeatEvent, communicationSocket);
+                break;
             default:
                 System.out.println("Something went horribly wrong, please restart.");
         }
