@@ -1,7 +1,10 @@
 package cs555.dfs.node;
 
+import cs555.dfs.util.ChunkMetadata;
+
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class NodeRecord {
     private String host;
@@ -9,6 +12,8 @@ public class NodeRecord {
     private int port;
     private long usableSpace;
     private Socket nodeSocket;
+    private int numChunks;
+    private HashMap<String, ChunkMetadata> chunkInfo = new HashMap<>();
 
     public NodeRecord(String hostPort, Socket nodeSocket, long usableSpace) throws IOException {
         this.host = hostPort.split(":")[0];
@@ -32,6 +37,11 @@ public class NodeRecord {
 
     public long getUsableSpace() { return usableSpace; }
     public void setUsableSpace(long usableSpace) { this.usableSpace = usableSpace; }
+
+    public int getNumChunks() { return numChunks; }
+    public void setNumChunks(int numChunks) { this.numChunks = numChunks; }
+
+    public HashMap<String, ChunkMetadata> getChunkInfo() { return chunkInfo; }
 
     @Override
     public boolean equals(Object o) {

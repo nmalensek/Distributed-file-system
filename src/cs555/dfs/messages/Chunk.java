@@ -8,7 +8,6 @@ public class Chunk implements Protocol, Event {
     private int messageType = CHUNK;
     private String replicationNodes;
     private String fileName;
-    private File fileChunk;
     private byte[] chunkByteArray;
 
     public Chunk getType() {
@@ -20,9 +19,6 @@ public class Chunk implements Protocol, Event {
 
     public String getFileName() { return fileName; }
     public void setFileName(String fileName) { this.fileName = fileName; }
-
-    public File getFileChunk() { return fileChunk; }
-    public void setFileChunk(File fileChunk) { this.fileChunk = fileChunk; }
 
     public byte[] getChunkByteArray() { return chunkByteArray; }
     public void setChunkByteArray(byte[] chunkByteArray) { this.chunkByteArray = chunkByteArray; }
@@ -51,10 +47,9 @@ public class Chunk implements Protocol, Event {
         dataOutputStream.writeInt(nameLength);
         dataOutputStream.write(nameBytes);
 
-        byte[] fileChunkBytes = Files.readAllBytes(fileChunk.toPath());
-        int fileBytesLength = fileChunkBytes.length;
-        dataOutputStream.writeInt(fileBytesLength);
-        dataOutputStream.write(fileChunkBytes);
+        int chunkBytesLength = chunkByteArray.length;
+        dataOutputStream.writeInt(chunkBytesLength);
+        dataOutputStream.write(chunkByteArray);
 
         dataOutputStream.flush();
         marshalledBytes = byteArrayOutputStream.toByteArray();
@@ -73,7 +68,21 @@ public class Chunk implements Protocol, Event {
 
         messageType = dataInputStream.readInt();
 
+        int nodesLength = dataInputStream.readInt();
+        byte[] replicationBytes = new byte[nodesLength];
+        dataInputStream.readFully(replicationBytes);
 
+        replicationNodes = new String(replicationBytes);
+
+        int nameLength = dataInputStream.readInt();
+        byte[] nameBytes = new byte[nameLength];
+        dataInputStream.readFully(nameBytes);
+
+        fileName = new String(nameBytes);
+
+        int chunkLength = dataInputStream.readInt();
+        chunkByteArray = new byte[chunkLength];
+        dataInputStream.readFully(chunkByteArray);
 
         byteArrayInputStream.close();
         dataInputStream.close();

@@ -4,6 +4,7 @@ import cs555.dfs.messages.MajorHeartbeatMessage;
 import cs555.dfs.messages.MinorHeartbeatMessage;
 import cs555.dfs.node.ChunkServer;
 import cs555.dfs.transport.TCPSender;
+import cs555.dfs.util.ChunkMetadata;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -43,22 +44,26 @@ public class ChunkServerHeartbeatThread extends Thread {
     }
 
     private String getNewChunks() {
-        ArrayList<String> newChunks = new ArrayList<>(owner.getNewChunksResponsibleFor());
-        StringBuilder chunkBuilder = new StringBuilder();
+        synchronized (owner.getNewChunksResponsibleFor()) {
+            ArrayList<String> newChunks = new ArrayList<>(owner.getNewChunksResponsibleFor());
+            StringBuilder chunkBuilder = new StringBuilder();
 
-        for (String chunkName : newChunks) {
-            chunkBuilder.append(chunkName).append(":");
+            for (String chunkMetadata : newChunks) {
+                chunkBuilder.append(chunkMetadata).append(",");
+            }
+
+            newChunks.clear();
+
+            return chunkBuilder.toString();
         }
-
-        return chunkBuilder.toString();
     }
 
     private String getAllChunks() {
-        ConcurrentHashMap<String, String> allChunks = new ConcurrentHashMap<>(owner.getChunksResponsibleFor());
+        ConcurrentHashMap<String, ChunkMetadata> allChunks = new ConcurrentHashMap<>(owner.getChunksResponsibleFor());
         StringBuilder allChunksBuilder = new StringBuilder();
 
         for (String chunkName : allChunks.keySet()) {
-            allChunksBuilder.append(chunkName).append(":");
+            allChunksBuilder.append(allChunks.get(chunkName).toString()).append(",");
         }
 
         return allChunksBuilder.toString();

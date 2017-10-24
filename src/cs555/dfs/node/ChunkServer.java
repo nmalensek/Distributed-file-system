@@ -6,6 +6,7 @@ import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.RequestMajorHeartbeat;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
+import cs555.dfs.util.ChunkMetadata;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,10 +24,11 @@ public class ChunkServer implements Node {
     private static String thisNodeHost;
     private static int sliceSize = 8192; //8kb slices
     private long freeSpace;
-    public static String storageDirectory = "/tmp/";
+    private static String storageDirectory = "test/";
+    private static String metadataDirectory = "test/metadata/";
     private TCPServerThread serverThread;
     private TCPSender sender = new TCPSender();
-    private ConcurrentHashMap<String, String> chunksResponsibleFor = new ConcurrentHashMap<>(); //chunkname, chunkname
+    private ConcurrentHashMap<String, ChunkMetadata> chunksResponsibleFor = new ConcurrentHashMap<>(); //chunkname, metadata
     private List<String> newChunksResponsibleFor = new ArrayList<>();
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
     ChunkServerHeartbeatThread chunkServerHeartbeatThread;
@@ -87,7 +89,7 @@ public class ChunkServer implements Node {
 
     public String getNodeID() { return thisNodeHost + ":" + thisNodePort; }
 
-    public ConcurrentHashMap<String, String> getChunksResponsibleFor() { return chunksResponsibleFor; }
+    public ConcurrentHashMap<String, ChunkMetadata> getChunksResponsibleFor() { return chunksResponsibleFor; }
 
     public List<String> getNewChunksResponsibleFor() { return newChunksResponsibleFor; }
 
