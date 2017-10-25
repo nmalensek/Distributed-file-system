@@ -121,7 +121,11 @@ public class Client implements Node {
     private void sendChunk(NodeInformation destination) throws IOException {
         String[] destinationNodes = destination.getNodeInfo().split(",");
         Chunk chunk = new Chunk();
-        chunk.setReplicationNodes(destinationNodes[1] + "," + destinationNodes[2]);
+        StringBuilder nextNodes = new StringBuilder();
+        for (int i = 1; i < destinationNodes.length; i++) {
+                nextNodes.append(destinationNodes[i]).append(",");
+        }
+        chunk.setReplicationNodes(nextNodes.toString());
         chunk.setFileName(file.getName() + "_chunk" + chunkNumber);
         chunk.setChunkByteArray(chunkList.remove());
 
