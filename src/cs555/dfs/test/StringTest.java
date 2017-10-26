@@ -2,6 +2,11 @@ package cs555.dfs.test;
 
 import cs555.dfs.hash.ComputeHash;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class StringTest {
 
 
@@ -19,8 +24,7 @@ public class StringTest {
         System.out.println(builder.toString());
     }
 
-    private void sliceTest() {
-        String string = "abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890";
+    private void sliceTest(String string) throws IOException {
         byte[] testBytes = string.getBytes();
 
         byte[] slice = new byte[5];
@@ -28,6 +32,8 @@ public class StringTest {
         int index = 0;
         long maximum = testBytes.length;
         int num = 1;
+
+        FileWriter fileWriter = new FileWriter("test/metadata/test_integrity");
 
         while (index < maximum) {
             for (int i = 0; i < slice.length; i++) {
@@ -38,16 +44,21 @@ public class StringTest {
                     break;
                 }
             }
+
+            fileWriter.append(ComputeHash.SHA1FromBytes(slice)).append("\n");
             System.out.println(num);
             System.out.println(ComputeHash.SHA1FromBytes(slice));
             num++;
         }
+        fileWriter.write(string);
+        fileWriter.close();
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         StringTest stringTest = new StringTest();
 //        stringTest.test();
-        stringTest.sliceTest();
+        stringTest.sliceTest("abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890");
+//        stringTest.sliceTest("abcdefghijklmnopqrstuvxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890");
     }
 }

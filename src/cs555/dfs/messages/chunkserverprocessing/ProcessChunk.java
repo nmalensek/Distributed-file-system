@@ -1,5 +1,6 @@
 package cs555.dfs.messages.chunkserverprocessing;
 
+import cs555.dfs.hash.ComputeHash;
 import cs555.dfs.messages.Chunk;
 import cs555.dfs.node.ChunkServer;
 import cs555.dfs.transport.TCPSender;
@@ -7,6 +8,7 @@ import cs555.dfs.util.ChunkMetadata;
 import cs555.dfs.util.Splitter;
 
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -20,9 +22,10 @@ public class ProcessChunk {
     private ChunkServer owner;
     private String metadataFilepath;
     private String storageDirectory;
+    private static int sliceSize = 8192;
+    private static String integrity = "_integrity";
     private Splitter splitter = new Splitter();
     private TCPSender forwardChunk = new TCPSender();
-    private String integrity = "_integrity";
 
     public ProcessChunk(ChunkServer owner, String metadataFilepath, String storageDirectory) {
         this.owner = owner;
@@ -50,6 +53,7 @@ public class ProcessChunk {
 
         try {
             fileOutputStream.write(chunkInformation.getChunkByteArray());
+            writeHashForSlices(chunkInformation);
             forwardToNextNode(chunkInformation);
         } finally {
             fileOutputStream.close();
@@ -59,11 +63,25 @@ public class ProcessChunk {
     private void writeHashForSlices(Chunk fileChunk) throws IOException {
         byte[] chunkBytes = fileChunk.getChunkByteArray();
 
-        byte[] slice = new byte[8192];
+        byte[] slice = new byte[sliceSize];
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + fileChunk.getFileName() + integrity)) {
+        int index = 0;
+        int maximum = chunkBytes.length;
 
+        FileWriter fileWriter = new FileWriter(storageDirectory + fileChunk.getFileName() + integrity);
+
+        while (index < maximum) {
+            for (int i = 0; i < slice.length; i++) {
+                try {
+                    slice[i] = chunkBytes[index];
+                    index++;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    break;
+                }
+            }
+            fileWriter.write(ComputeHash.SHA1FromBytes(slice));
         }
+        fileWriter.close();
     }
 
     /**
