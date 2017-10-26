@@ -22,6 +22,7 @@ public class ProcessChunk {
     private String storageDirectory;
     private Splitter splitter = new Splitter();
     private TCPSender forwardChunk = new TCPSender();
+    private String integrity = "_integrity";
 
     public ProcessChunk(ChunkServer owner, String metadataFilepath, String storageDirectory) {
         this.owner = owner;
@@ -55,8 +56,14 @@ public class ProcessChunk {
         }
     }
 
-    private void writeHashForSlices() {
+    private void writeHashForSlices(Chunk fileChunk) throws IOException {
+        byte[] chunkBytes = fileChunk.getChunkByteArray();
 
+        byte[] slice = new byte[8192];
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + fileChunk.getFileName() + integrity)) {
+
+        }
     }
 
     /**
@@ -79,10 +86,5 @@ public class ProcessChunk {
             forwardChunk.send(nextSocket, chunk.getBytes());
         }
     }
-
-    //get replication nodes, if it's yourself, remove and put the other(s) in new message
-    //get filename, which will include chunk#, so split out for the metadata and also write full name
-    //write file to disk
-    //forward to B/C/do nothing
 
 }

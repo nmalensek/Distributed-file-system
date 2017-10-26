@@ -1,5 +1,7 @@
 package cs555.dfs.test;
 
+import cs555.dfs.hash.ComputeHash;
+
 public class StringTest {
 
 
@@ -17,8 +19,35 @@ public class StringTest {
         System.out.println(builder.toString());
     }
 
+    private void sliceTest() {
+        String string = "abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890";
+        byte[] testBytes = string.getBytes();
+
+        byte[] slice = new byte[5];
+
+        int index = 0;
+        long maximum = testBytes.length;
+        int num = 1;
+
+        while (index < maximum) {
+            for (int i = 0; i < slice.length; i++) {
+                try {
+                    slice[i] = testBytes[index];
+                    index++;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    break;
+                }
+            }
+            System.out.println(num);
+            System.out.println(ComputeHash.SHA1FromBytes(slice));
+            num++;
+        }
+
+    }
+
     public static void main(String[] args) {
         StringTest stringTest = new StringTest();
-        stringTest.test();
+//        stringTest.test();
+        stringTest.sliceTest();
     }
 }
