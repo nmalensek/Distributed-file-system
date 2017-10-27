@@ -44,7 +44,7 @@ public class TCPReceiverThread extends Thread implements Protocol {
             } catch (IOException ioe) {
                 ioe.printStackTrace();
                 communicationSocket = null;
-                System.out.println("A node left the overlay");
+//                System.out.println("A node left the overlay");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -89,8 +89,14 @@ public class TCPReceiverThread extends Thread implements Protocol {
                 node.onEvent(requestMajorHeartbeatEvent, communicationSocket);
                 break;
             case CHUNK:
+                Event<Chunk> chunkEvent =
+                        eventFactory.chunkEvent(marshalledBytes);
+                node.onEvent(chunkEvent, communicationSocket);
                 break;
-            case FILE_INQUIRY:
+            case WRITE_INQUIRY:
+                Event<WriteFileInquiry> writeFileInquiryEvent =
+                        eventFactory.writeFileInquiryEvent(marshalledBytes);
+                node.onEvent(writeFileInquiryEvent, communicationSocket);
                 break;
             default:
                 System.out.println("Something went horribly wrong, please restart.");

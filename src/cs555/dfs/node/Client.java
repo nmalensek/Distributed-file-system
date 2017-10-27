@@ -8,11 +8,14 @@ import cs555.dfs.transport.TCPReceiverThread;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.Splitter;
+import cs555.dfs.util.TextInputThread;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -24,9 +27,10 @@ public class Client implements Node {
     private static String controllerHost;
     private static int chunkSize = 65536;
     private int thisNodePort;
+    private static String thisNodeHost;
     private Splitter split = new Splitter();
     private TCPServerThread clientServer;
-    private TCPSender clientSender;
+    private TCPSender clientSender = new TCPSender();
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
     private Path filePath;
     private File file;
@@ -42,6 +46,8 @@ public class Client implements Node {
         clientServer = new TCPServerThread(this, 0);
         clientServer.start();
         setPort();
+        TextInputThread textInputThread = new TextInputThread(this);
+        textInputThread.start();
     }
 
     private void setPort() {
@@ -62,8 +68,13 @@ public class Client implements Node {
         if (event instanceof NodeInformation) {
             sendChunk((NodeInformation) event);
             if (!chunkList.isEmpty()) {
+                System.out.println("Asking for destinations for chunk " + chunkNumber);
                 WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
+                writeFileInquiry.setClientAddress(thisNodeHost + ":" + thisNodePort);
                 clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
+            } else {
+                System.out.println("Done sending chunks");
+                chunkNumber = 1; //sent all the file's chunks, reset chunk counter
             }
         }
     }
@@ -81,7 +92,9 @@ public class Client implements Node {
 
                     chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
+                    writeFileInquiry.setClientAddress(thisNodeHost + ":" + thisNodePort);
                     clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
+                    System.out.println("Asking for destination...");
                 } catch (StringIndexOutOfBoundsException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
                     System.out.println("Usage: write [filePath]");
                 }
@@ -109,6 +122,7 @@ public class Client implements Node {
                     if (bytesRemaining < chunkSize) {
                         chunkList.add(chunk);
                     }
+                    System.out.println("Done chunking file");
                     break;
                 }
             }
@@ -131,6 +145,7 @@ public class Client implements Node {
 
         Socket destinationSocket = new Socket(split.getHost(destinationNodes[0]), split.getPort(destinationNodes[0]));
         clientSender.send(destinationSocket, chunk.getBytes());
+        System.out.println("Sent " + chunk.getFileName() + " to " + destinationNodes[0]);
         chunkNumber++;
     }
 
@@ -138,8 +153,14 @@ public class Client implements Node {
         try {
             controllerHost = args[0];
             controllerPort = Integer.parseInt(args[1]);
+            thisNodeHost = Inet4Address.getLocalHost().getHostName();
+
+            Client client = new Client();
+            client.startup();
         } catch (IndexOutOfBoundsException e) {
             System.out.println("Usage: [controller host] [controller port]");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

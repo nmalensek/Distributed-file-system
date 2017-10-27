@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkServerHeartbeatThread extends Thread {
 
-    private int heartbeatInterval = 3000;
-    private int majorHeartbeatInterval = 30000;
+    private int heartbeatInterval = 30000;
+    private int majorHeartbeatInterval = 300000;
     private int heartbeatCount = 0;
     private Socket controllerSocket;
     private ChunkServer owner;

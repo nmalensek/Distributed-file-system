@@ -48,6 +48,9 @@ public class ProcessHeartbeats {
             for (String name : splitNames) {
                 processChunkName(name, nodes, nodeChunksMap, heartbeat.getNodeInfo());
             }
+
+            updateNodeRecord(nodes.get(heartbeat.getNodeInfo()), heartbeat.getFreeSpace(), splitNames.length);
+
         } else { //Controller is recovering, request major heartbeat
 
             NodeRecord nodeInOverlay = registerNodeData(heartbeat.getNodeInfo(), heartbeat.getFreeSpace());
@@ -107,6 +110,11 @@ public class ProcessHeartbeats {
         Socket nodeSocket = new Socket(split.getHost(nodeID), split.getPort(nodeID));
 
         return new NodeRecord(nodeID, nodeSocket, freeSpace);
+    }
+
+    private synchronized void updateNodeRecord(NodeRecord nodeToUpdate, long updatedSpace, int numNewChunks) {
+        nodeToUpdate.setUsableSpace(updatedSpace);
+        nodeToUpdate.setNumChunks(nodeToUpdate.getNumChunks() + numNewChunks);
     }
 
     private void sendTestResponse(Socket socket) throws IOException {

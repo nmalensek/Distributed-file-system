@@ -4,7 +4,8 @@ import java.io.*;
 
 
 public class WriteFileInquiry implements Protocol, Event {
-    private int messageType = FILE_INQUIRY;
+    private int messageType = WRITE_INQUIRY;
+    private String clientAddress;
 
     public WriteFileInquiry getType() {
         return this;
@@ -15,6 +16,10 @@ public class WriteFileInquiry implements Protocol, Event {
         return messageType;
     }
 
+    public String getClientAddress() { return clientAddress; }
+
+    public void setClientAddress(String clientAddress) { this.clientAddress = clientAddress; }
+
     //marshalls bytes
     public byte[] getBytes() throws IOException {
         byte[] marshalledBytes = null;
@@ -23,6 +28,11 @@ public class WriteFileInquiry implements Protocol, Event {
                 new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
 
         dataOutputStream.writeInt(messageType);
+
+        byte[] clientBytes = clientAddress.getBytes();
+        int clientLength = clientAddress.length();
+        dataOutputStream.writeInt(clientLength);
+        dataOutputStream.write(clientBytes);
 
         dataOutputStream.flush();
         marshalledBytes = byteArrayOutputStream.toByteArray();
@@ -40,6 +50,12 @@ public class WriteFileInquiry implements Protocol, Event {
                 new DataInputStream(new BufferedInputStream(byteArrayInputStream));
 
         messageType = dataInputStream.readInt();
+
+        int clientLength = dataInputStream.readInt();
+        byte[] clientBytes = new byte[clientLength];
+        dataInputStream.readFully(clientBytes);
+
+        clientAddress = new String(clientBytes);
 
         byteArrayInputStream.close();
         dataInputStream.close();

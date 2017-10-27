@@ -26,17 +26,17 @@ public class ProcessChunk {
     private static String integrity = "_integrity";
     private Splitter splitter = new Splitter();
     private TCPSender forwardChunk = new TCPSender();
+    private FileWriter metadataWriter = new FileWriter(metadataFilepath);
 
-    public ProcessChunk(ChunkServer owner, String metadataFilepath, String storageDirectory) {
+    public ProcessChunk(ChunkServer owner, String metadataFilepath, String storageDirectory) throws IOException {
         this.owner = owner;
         this.metadataFilepath = metadataFilepath;
         this.storageDirectory = storageDirectory;
     }
 
     private void writeMetadata(String metadata) throws IOException {
-        List<String> line = Arrays.asList(metadata);
-        Path path = Paths.get(metadataFilepath);
-        Files.write(path, line);
+        metadataWriter.write(metadata + "\n");
+        metadataWriter.flush();
     }
 
     public void writeAndLogChunk(Chunk chunkInformation) throws IOException {
@@ -60,6 +60,11 @@ public class ProcessChunk {
         }
     }
 
+    /**
+     * Given a byte array, get the SHA-1 hash for each 8kb slice and write it to a file.
+     * @param fileChunk Chunk of a split file.
+     * @throws IOException
+     */
     private void writeHashForSlices(Chunk fileChunk) throws IOException {
         byte[] chunkBytes = fileChunk.getChunkByteArray();
 
@@ -79,7 +84,7 @@ public class ProcessChunk {
                     break;
                 }
             }
-            fileWriter.write(ComputeHash.SHA1FromBytes(slice));
+            fileWriter.write(ComputeHash.SHA1FromBytes(slice) + "\n");
         }
         fileWriter.close();
     }

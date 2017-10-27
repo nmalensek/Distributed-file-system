@@ -1,10 +1,8 @@
 package cs555.dfs.node;
 
-import cs555.dfs.messages.Event;
-import cs555.dfs.messages.MajorHeartbeatMessage;
-import cs555.dfs.messages.MinorHeartbeatMessage;
-import cs555.dfs.messages.NodeInformation;
+import cs555.dfs.messages.*;
 import cs555.dfs.messages.controllerprocessing.ProcessHeartbeats;
+import cs555.dfs.messages.controllerprocessing.ProcessInquiries;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 
@@ -23,6 +21,7 @@ public class ControllerNode implements Node {
     private ConcurrentHashMap<String, List<String>> chunkStorageMap = new ConcurrentHashMap<>(); //<chunkname, list<nodeID>>
     private ConcurrentHashMap<String, NodeRecord> nodesInOverlay = new ConcurrentHashMap<>(); //<nodeID, node data>
     private ProcessHeartbeats processHeartbeats = new ProcessHeartbeats();
+    private ProcessInquiries processInquiries = new ProcessInquiries();
 
 
     private void startup() {
@@ -41,6 +40,9 @@ public class ControllerNode implements Node {
         } else if (event instanceof MajorHeartbeatMessage) {
             processHeartbeats.processMajorHeartbeat(chunkStorageMap, nodesInOverlay, (MajorHeartbeatMessage) event);
             System.out.println("got a major heartbeat at " + System.currentTimeMillis());
+        } else if (event instanceof WriteFileInquiry) {
+            System.out.println("Processing write inquiry");
+            processInquiries.processWriteFileInquiry(nodesInOverlay, (WriteFileInquiry) event);
         }
     }
 
