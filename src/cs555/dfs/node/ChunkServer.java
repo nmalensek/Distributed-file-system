@@ -14,13 +14,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static cs555.dfs.util.Constants.metadataFilepath;
+import static cs555.dfs.util.Constants.storageDirectory;
 
 public class ChunkServer implements Node {
 
@@ -28,21 +27,18 @@ public class ChunkServer implements Node {
     private static String controllerHost;
     private int thisNodePort;
     private static String thisNodeHost;
-    private static int sliceSize = 8192; //8kb slices
     private long freeSpace;
-    private static String storageDirectory = "test/";
-    private static String metadataFilepath;
     private TCPServerThread serverThread;
     private TCPSender sender = new TCPSender();
     private ConcurrentHashMap<String, ChunkMetadata> chunksResponsibleFor = new ConcurrentHashMap<>(); //chunkname, metadata
     private List<String> newChunksResponsibleFor = new ArrayList<>(); //metadata.toString()
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
-    private ProcessChunk chunkProcessor;
-    ChunkServerHeartbeatThread chunkServerHeartbeatThread;
+    private ProcessChunk chunkProcessor = new ProcessChunk(this, storageDirectory);
+    private ChunkServerHeartbeatThread chunkServerHeartbeatThread =
+            new ChunkServerHeartbeatThread(controllerNodeSocket, this, metadataFilepath);
 
     public ChunkServer() throws IOException {
-        metadataFilepath = "test/metadata/metadata";
-        chunkProcessor = new ProcessChunk(this, metadataFilepath, storageDirectory);
+
     }
 
     private void startup() {
@@ -76,7 +72,6 @@ public class ChunkServer implements Node {
     }
 
     private void startHeartbeats() throws IOException {
-        chunkServerHeartbeatThread = new ChunkServerHeartbeatThread(controllerNodeSocket, this, metadataFilepath);
         chunkServerHeartbeatThread.start();
         //register with controller
         NodeInformation nodeInformation = new NodeInformation();

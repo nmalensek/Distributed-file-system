@@ -21,11 +21,12 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import static cs555.dfs.util.Constants.chunkSize;
+
 public class Client implements Node {
 
     private static int controllerPort;
     private static String controllerHost;
-    private static int chunkSize = 65536;
     private int thisNodePort;
     private static String thisNodeHost;
     private Splitter split = new Splitter();

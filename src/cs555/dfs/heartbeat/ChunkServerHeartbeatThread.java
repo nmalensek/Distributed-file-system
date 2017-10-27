@@ -11,10 +11,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static cs555.dfs.util.Constants.heartbeatInterval;
+import static cs555.dfs.util.Constants.majorHeartbeatInterval;
+
 public class ChunkServerHeartbeatThread extends Thread {
 
-    private int heartbeatInterval = 30000;
-    private int majorHeartbeatInterval = 300000;
     private int heartbeatCount = 0;
     private Socket controllerSocket;
     private ChunkServer owner;
@@ -88,9 +89,7 @@ public class ChunkServerHeartbeatThread extends Thread {
                     System.out.println("Sending minor heartbeat...");
                     sendMinorHeartbeat();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
         }

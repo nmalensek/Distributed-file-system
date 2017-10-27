@@ -11,26 +11,21 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
+
+import static cs555.dfs.util.Constants.integrity;
+import static cs555.dfs.util.Constants.metadataFilepath;
+import static cs555.dfs.util.Constants.sliceSize;
 
 public class ProcessChunk {
 
     private ChunkServer owner;
-    private String metadataFilepath;
     private String storageDirectory;
-    private static int sliceSize = 8192;
-    private static String integrity = "_integrity";
     private Splitter splitter = new Splitter();
     private TCPSender forwardChunk = new TCPSender();
     private FileWriter metadataWriter = new FileWriter(metadataFilepath);
 
-    public ProcessChunk(ChunkServer owner, String metadataFilepath, String storageDirectory) throws IOException {
+    public ProcessChunk(ChunkServer owner, String storageDirectory) throws IOException {
         this.owner = owner;
-        this.metadataFilepath = metadataFilepath;
         this.storageDirectory = storageDirectory;
     }
 
