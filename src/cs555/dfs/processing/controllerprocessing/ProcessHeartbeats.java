@@ -1,4 +1,4 @@
-package cs555.dfs.messages.controllerprocessing;
+package cs555.dfs.processing.controllerprocessing;
 
 import cs555.dfs.messages.MajorHeartbeatMessage;
 import cs555.dfs.messages.MinorHeartbeatMessage;

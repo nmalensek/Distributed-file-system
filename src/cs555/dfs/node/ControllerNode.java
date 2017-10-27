@@ -1,10 +1,10 @@
 package cs555.dfs.node;
 
 import cs555.dfs.messages.*;
-import cs555.dfs.messages.controllerprocessing.ProcessHeartbeats;
-import cs555.dfs.messages.controllerprocessing.ProcessInquiries;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
+import cs555.dfs.processing.controllerprocessing.ProcessHeartbeats;
+import cs555.dfs.processing.controllerprocessing.ProcessInquiries;
 
 import java.io.IOException;
 import java.net.Inet4Address;

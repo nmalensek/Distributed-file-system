@@ -1,4 +1,4 @@
-package cs555.dfs.messages.chunkserverprocessing;
+package cs555.dfs.processing.chunkserverprocessing;
 
 import cs555.dfs.hash.ComputeHash;
 import cs555.dfs.messages.Chunk;

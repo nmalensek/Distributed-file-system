@@ -1,4 +1,4 @@
-package cs555.dfs.messages.controllerprocessing;
+package cs555.dfs.processing.controllerprocessing;
 
 import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.WriteFileInquiry;

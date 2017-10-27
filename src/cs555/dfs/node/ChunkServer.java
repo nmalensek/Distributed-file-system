@@ -5,10 +5,10 @@ import cs555.dfs.messages.Chunk;
 import cs555.dfs.messages.Event;
 import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.RequestMajorHeartbeat;
-import cs555.dfs.messages.chunkserverprocessing.ProcessChunk;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.ChunkMetadata;
+import cs555.dfs.processing.chunkserverprocessing.ProcessChunk;
 
 import java.io.File;
 import java.io.IOException;

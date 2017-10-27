@@ -4,6 +4,7 @@ import cs555.dfs.messages.Chunk;
 import cs555.dfs.messages.Event;
 import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.WriteFileInquiry;
+import cs555.dfs.processing.ClientChunkProcessor;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.Splitter;
@@ -35,6 +36,7 @@ public class Client implements Node {
     private Path filePath;
     private File file;
     private LinkedList<byte[]> chunkList = new LinkedList<>();
+    private ClientChunkProcessor chunkProcessor = new ClientChunkProcessor(chunkList);
     private HashMap<String, byte[]> receivedChunks = new HashMap<>();
     private int chunkNumber = 1;
 
@@ -66,7 +68,7 @@ public class Client implements Node {
     @Override
     public void onEvent(Event event, Socket destinationSocket) throws IOException {
         if (event instanceof NodeInformation) {
-            sendChunk((NodeInformation) event);
+            chunkProcessor.sendChunk((NodeInformation) event, chunkNumber, file.getName(), this);
             if (!chunkList.isEmpty()) {
                 System.out.println("Asking for destinations for chunk " + chunkNumber);
                 WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
@@ -84,13 +86,18 @@ public class Client implements Node {
         String command = text.split("\\s")[0];
         switch (command) {
             case "read":
+                try {
+
+                } catch (StringIndexOutOfBoundsException e) {
+                    System.out.println("Usage: read [file name]");
+                }
                 break;
             case "write":
                 try {
                     filePath = Paths.get(text.split("\\s")[1]);
                     file = new File(text.split("\\s")[1]);
 
-                    chunkFile(file);
+                    chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
                     writeFileInquiry.setClientAddress(thisNodeHost + ":" + thisNodePort);
                     clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
@@ -102,43 +109,7 @@ public class Client implements Node {
         }
     }
 
-    private void chunkFile(File fileToChunk) throws IOException {
-
-        FileInputStream fileInputStream = new FileInputStream(fileToChunk);
-
-        byte[] chunk = new byte[chunkSize];
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        int read;
-        try {
-            while ((read = fileInputStream.read(chunk)) != -1) {
-                byteArrayOutputStream.write(chunk, 0, read);
-                chunkList.add(byteArrayOutputStream.toByteArray());
-                byteArrayOutputStream.reset();
-            }
-            System.out.println(chunkList.size());
-        } finally {
-            fileInputStream.close();
-        }
-    }
-
-    private void sendChunk(NodeInformation destination) throws IOException {
-        String[] destinationNodes = destination.getNodeInfo().split(",");
-        Chunk chunk = new Chunk();
-        StringBuilder nextNodes = new StringBuilder();
-        for (int i = 1; i < destinationNodes.length; i++) {
-                nextNodes.append(destinationNodes[i]).append(",");
-        }
-        chunk.setReplicationNodes(nextNodes.toString());
-        chunk.setFileName(file.getName() + "_chunk" + chunkNumber);
-        chunk.setChunkByteArray(chunkList.remove());
-
-        Socket destinationSocket = new Socket(split.getHost(destinationNodes[0]), split.getPort(destinationNodes[0]));
-        clientSender.send(destinationSocket, chunk.getBytes());
-        System.out.println("Sent " + chunk.getFileName() + " to " + destinationNodes[0]);
-        chunkNumber++;
-    }
+    public void setChunkNumber(int chunkNumber) { this.chunkNumber = chunkNumber; }
 
     public static void main(String[] args) {
         try {
