@@ -20,24 +20,16 @@ public class FileChunkTest {
 
         FileInputStream fileInputStream = new FileInputStream(fileToChunk);
 
-        int bytesRemaining = chunkSize;
+        byte[] chunk = new byte[chunkSize];
 
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        int read;
         try {
-            while (true) {
-                byte[] chunk = new byte[chunkSize];
-                int read = fileInputStream.read(chunk, chunk.length - bytesRemaining, bytesRemaining);
-                if (read >= 0) {
-                    bytesRemaining -= read;
-                    if (bytesRemaining == 0) {
-                        chunkList.add(chunk);
-                        bytesRemaining = chunkSize;
-                    }
-                } else {
-                    if (bytesRemaining < chunkSize) {
-                        chunkList.add(chunk);
-                    }
-                    break;
-                }
+            while ((read = fileInputStream.read(chunk)) != -1) {
+                byteArrayOutputStream.write(chunk, 0, read);
+                chunkList.add(byteArrayOutputStream.toByteArray());
+                byteArrayOutputStream.reset();
             }
             System.out.println(chunkList.size());
         } finally {
@@ -73,7 +65,6 @@ public class FileChunkTest {
     private void mergeChunks(String destinationPath) throws IOException {
         File destinationFile = new File(destinationPath);
         FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);
-//        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
 
         for (byte[] array : chunkList) {
             fileOutputStream.write(array);
@@ -82,8 +73,8 @@ public class FileChunkTest {
 
     public static void main(String[] args) throws IOException {
         FileChunkTest fileChunkTest = new FileChunkTest();
-        fileChunkTest.chunkFiles("test.mp3");
-//        fileChunkTest.writeChunks("test.mp3");
-        fileChunkTest.mergeChunks(fileStorageLocation + "merged.mp3");
+        fileChunkTest.chunkFiles("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
+        fileChunkTest.writeChunks("animals_of_the_past.txt");
+        fileChunkTest.mergeChunks(fileStorageLocation + "merged.txt");
     }
 }

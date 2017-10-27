@@ -4,18 +4,17 @@ import cs555.dfs.messages.Chunk;
 import cs555.dfs.messages.Event;
 import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.WriteFileInquiry;
-import cs555.dfs.transport.TCPReceiverThread;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.Splitter;
 import cs555.dfs.util.TextInputThread;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -107,30 +106,21 @@ public class Client implements Node {
 
         FileInputStream fileInputStream = new FileInputStream(fileToChunk);
 
-        int bytesRemaining = chunkSize;
+        byte[] chunk = new byte[chunkSize];
 
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        int read;
         try {
-            while (true) {
-                byte[] chunk = new byte[chunkSize];
-                int read = fileInputStream.read(chunk, chunk.length - bytesRemaining, bytesRemaining);
-                if (read >= 0) {
-                    bytesRemaining -= read;
-                    if (bytesRemaining == 0) {
-                        chunkList.add(chunk);
-                        bytesRemaining = chunkSize;
-                    }
-                } else {
-                    if (bytesRemaining < chunkSize) {
-                        chunkList.add(chunk);
-                    }
-                    System.out.println("Done chunking file");
-                    break;
-                }
+            while ((read = fileInputStream.read(chunk)) != -1) {
+                byteArrayOutputStream.write(chunk, 0, read);
+                chunkList.add(byteArrayOutputStream.toByteArray());
+                byteArrayOutputStream.reset();
             }
+            System.out.println(chunkList.size());
         } finally {
             fileInputStream.close();
         }
-
     }
 
     private void sendChunk(NodeInformation destination) throws IOException {
