@@ -55,10 +55,17 @@ public class StringTest {
 
     }
 
+    private void splitTest() {
+        String commas = ",,,";
+        String[] split = commas.split(",");
+        System.out.println(split.length);
+    }
+
     public static void main(String[] args) throws IOException {
         StringTest stringTest = new StringTest();
 //        stringTest.test();
-        stringTest.sliceTest("abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890");
+//        stringTest.sliceTest("abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890");
 //        stringTest.sliceTest("abcdefghijklmnopqrstuvxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890");
+        stringTest.splitTest();
     }
 }

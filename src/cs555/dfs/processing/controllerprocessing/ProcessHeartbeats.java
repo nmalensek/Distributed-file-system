@@ -43,14 +43,12 @@ public class ProcessHeartbeats {
                                                    MinorHeartbeatMessage heartbeat) throws IOException {
 
         if (nodes.get(heartbeat.getNodeInfo()) != null) {
-            String newChunkNames = heartbeat.getNewChunkData();
-            String[] splitNames = newChunkNames.split(":");
-            for (String name : splitNames) {
-                processChunkName(name, nodes, nodeChunksMap, heartbeat.getNodeInfo());
+            String newChunksMetadata = heartbeat.getNewChunkData();
+            if (newChunksMetadata.split(",").length != 0) {
+                    processChunkData(newChunksMetadata, nodes, nodeChunksMap, heartbeat.getNodeInfo());
+                updateNodeRecord(nodes.get(heartbeat.getNodeInfo()), heartbeat.getFreeSpace(),
+                        newChunksMetadata.split(",").length);
             }
-
-            updateNodeRecord(nodes.get(heartbeat.getNodeInfo()), heartbeat.getFreeSpace(), splitNames.length);
-
         } else { //Controller is recovering, request major heartbeat
 
             NodeRecord nodeInOverlay = registerNodeData(heartbeat.getNodeInfo(), heartbeat.getFreeSpace());
@@ -70,18 +68,16 @@ public class ProcessHeartbeats {
             nodes.put(majorHeartbeat.getNodeInfo(), nodeRecord);
         }
 
-        String allChunkData = majorHeartbeat.getAllChunkData();
-        String[] splitChunkData = allChunkData.split(",");
-        for (String data : splitChunkData) {
-            processChunkName(data, nodes, nodeChunksMap, majorHeartbeat.getNodeInfo());
-        }
+            processChunkData(majorHeartbeat.getAllChunkData(), nodes, nodeChunksMap, majorHeartbeat.getNodeInfo());
     }
 
-    private synchronized void processChunkName(String chunkData,
+    private synchronized void processChunkData(String messageData,
                                                ConcurrentHashMap<String, NodeRecord> nodes,
                                                ConcurrentHashMap<String, List<String>> nodeChunks, String nodeID) {
-        try {
-            String[] splitChunkData = chunkData.split(":");
+        String[] splitDataIntoChunks = messageData.split(",");
+        for (String data : splitDataIntoChunks) {
+
+            String[] splitChunkData = data.split(":");
             String chunkName = splitChunkData[0];
             int versionNumber = Integer.parseInt(splitChunkData[1]);
             String fileName = splitChunkData[2];
@@ -100,10 +96,7 @@ public class ProcessHeartbeats {
                     nodeChunks.get(chunkName).add(nodeID);
                 }
             }
-        } catch (ArrayIndexOutOfBoundsException ignored) {
-            //no chunkdata, chunk server hasn't stored any new chunks
         }
-
     }
 
     private synchronized NodeRecord registerNodeData(String nodeID, long freeSpace) throws IOException {

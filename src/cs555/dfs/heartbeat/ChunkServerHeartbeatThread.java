@@ -48,14 +48,13 @@ public class ChunkServerHeartbeatThread extends Thread {
 
     private String getNewChunks() {
         synchronized (owner.getNewChunksResponsibleFor()) {
-            ArrayList<String> newChunks = new ArrayList<>(owner.getNewChunksResponsibleFor());
             StringBuilder chunkBuilder = new StringBuilder();
 
-            for (String chunkMetadata : newChunks) {
+            for (String chunkMetadata : owner.getNewChunksResponsibleFor()) {
                 chunkBuilder.append(chunkMetadata).append(",");
             }
 
-            newChunks.clear();
+            owner.getNewChunksResponsibleFor().clear();
 
             return chunkBuilder.toString();
         }

@@ -42,7 +42,7 @@ public class ChunkServer implements Node {
     }
 
     private void startup() {
-        getUsableSpace();
+        updateUsableSpace();
         serverThread = new TCPServerThread(this, 0);
         serverThread.start();
         setPort();
@@ -66,7 +66,7 @@ public class ChunkServer implements Node {
         }
     }
 
-    private void getUsableSpace() { //TODO: call this after every chunk storage
+    private void updateUsableSpace() {
         File tmpDirectory = new File(storageDirectory);
         freeSpace = tmpDirectory.getUsableSpace();
     }
@@ -88,6 +88,7 @@ public class ChunkServer implements Node {
             chunkServerHeartbeatThread.sendMajorHeartbeat();
         } else if (event instanceof Chunk) {
             chunkProcessor.writeAndLogChunk((Chunk) event);
+            updateUsableSpace();
         }
 
     }
