@@ -1,9 +1,6 @@
 package cs555.dfs.node;
 
-import cs555.dfs.messages.Chunk;
-import cs555.dfs.messages.Event;
-import cs555.dfs.messages.NodeInformation;
-import cs555.dfs.messages.WriteFileInquiry;
+import cs555.dfs.messages.*;
 import cs555.dfs.processing.ClientChunkProcessor;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
@@ -29,6 +26,7 @@ public class Client implements Node {
     private static String controllerHost;
     private int thisNodePort;
     private static String thisNodeHost;
+    private String thisNodeID;
     private Splitter split = new Splitter();
     private TCPServerThread clientServer;
     private TCPSender clientSender = new TCPSender();
@@ -57,6 +55,7 @@ public class Client implements Node {
             try {
                 thisNodePort = clientServer.getPortNumber();
                 if (thisNodePort != 0) {
+                    thisNodeID = thisNodeHost + ":" + thisNodePort;
                     break;
                 }
             } catch (NullPointerException ignored) {
@@ -68,16 +67,24 @@ public class Client implements Node {
     @Override
     public void onEvent(Event event, Socket destinationSocket) throws IOException {
         if (event instanceof NodeInformation) {
-            chunkProcessor.sendChunk((NodeInformation) event, chunkNumber, file.getName(), this);
-            if (!chunkList.isEmpty()) {
-                System.out.println("Asking for destinations for chunk " + chunkNumber);
-                WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
-                writeFileInquiry.setClientAddress(thisNodeHost + ":" + thisNodePort);
-                clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
-            } else {
-                System.out.println("Done sending chunks");
-                chunkNumber = 1; //sent all the file's chunks, reset chunk counter
+            if (((NodeInformation) event).getInformationType() == Protocol.CHUNK_DESTINATION) {
+                sendChunk((NodeInformation) event);
+            } else if (((NodeInformation) event).getInformationType() == Protocol.CHUNK_LOCATION) {
+                //request chunks
             }
+        }
+    }
+
+    private void sendChunk(NodeInformation information) throws IOException {
+        chunkProcessor.sendChunk(information, chunkNumber, file.getName(), this);
+        if (!chunkList.isEmpty()) {
+            System.out.println("Asking for destinations for chunk " + chunkNumber);
+            WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
+            writeFileInquiry.setClientAddress(thisNodeID);
+            clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
+        } else {
+            System.out.println("Done sending chunks");
+            chunkNumber = 1; //sent all the file's chunks, reset chunk counter
         }
     }
 
@@ -87,7 +94,10 @@ public class Client implements Node {
         switch (command) {
             case "read":
                 try {
-
+                    ReadFileInquiry readFileInquiry = new ReadFileInquiry();
+                    readFileInquiry.setClientAddress(thisNodeID);
+                    readFileInquiry.setFilename(text.split("\\s")[1]);
+                    clientSender.send(controllerNodeSocket, readFileInquiry.getBytes());
                 } catch (StringIndexOutOfBoundsException e) {
                     System.out.println("Usage: read [file name]");
                 }
@@ -99,7 +109,7 @@ public class Client implements Node {
 
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
-                    writeFileInquiry.setClientAddress(thisNodeHost + ":" + thisNodePort);
+                    writeFileInquiry.setClientAddress(thisNodeID);
                     clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
                     System.out.println("Asking for destination...");
                 } catch (StringIndexOutOfBoundsException | NumberFormatException | ArrayIndexOutOfBoundsException e) {

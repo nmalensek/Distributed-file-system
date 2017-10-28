@@ -18,7 +18,8 @@ public class ControllerNode implements Node {
     private static int controllerPort;
     private static String controllerHost;
     private TCPSender controllerSender = new TCPSender();
-    private ConcurrentHashMap<String, List<String>> chunkStorageMap = new ConcurrentHashMap<>(); //<chunkname, list<nodeID>>
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> chunkStorageMap
+            = new ConcurrentHashMap<>(); //<filename, <chunkname, list<nodeID>>>
     private ConcurrentHashMap<String, NodeRecord> nodesInOverlay = new ConcurrentHashMap<>(); //<nodeID, node data>
     private ProcessHeartbeats processHeartbeats = new ProcessHeartbeats();
     private ProcessInquiries processInquiries = new ProcessInquiries();
@@ -43,6 +44,8 @@ public class ControllerNode implements Node {
         } else if (event instanceof WriteFileInquiry) {
             System.out.println("Processing write inquiry");
             processInquiries.processWriteFileInquiry(nodesInOverlay, (WriteFileInquiry) event);
+        } else if (event instanceof ReadFileInquiry) {
+            processInquiries.processReadFileInquiry((ReadFileInquiry) event, chunkStorageMap);
         }
     }
 

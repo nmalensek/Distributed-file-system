@@ -38,14 +38,14 @@ public class ProcessHeartbeats {
         sendTestResponse(newNode.getNodeSocket());
     }
 
-    public synchronized void processMinorHeartbeat(ConcurrentHashMap<String, List<String>> nodeChunksMap,
+    public synchronized void processMinorHeartbeat(ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
                                                    ConcurrentHashMap<String, NodeRecord> nodes,
                                                    MinorHeartbeatMessage heartbeat) throws IOException {
 
         if (nodes.get(heartbeat.getNodeInfo()) != null) {
             String newChunksMetadata = heartbeat.getNewChunkData();
             if (newChunksMetadata.split(",").length != 0) {
-                    processChunkData(newChunksMetadata, nodes, nodeChunksMap, heartbeat.getNodeInfo());
+                processChunkData(newChunksMetadata, nodes, nodeChunksMap, heartbeat.getNodeInfo());
                 updateNodeRecord(nodes.get(heartbeat.getNodeInfo()), heartbeat.getFreeSpace(),
                         newChunksMetadata.split(",").length);
             }
@@ -59,7 +59,7 @@ public class ProcessHeartbeats {
         }
     }
 
-    public synchronized void processMajorHeartbeat(ConcurrentHashMap<String, List<String>> nodeChunksMap,
+    public synchronized void processMajorHeartbeat(ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
                                                    ConcurrentHashMap<String, NodeRecord> nodes,
                                                    MajorHeartbeatMessage majorHeartbeat) throws IOException {
 
@@ -68,12 +68,13 @@ public class ProcessHeartbeats {
             nodes.put(majorHeartbeat.getNodeInfo(), nodeRecord);
         }
 
-            processChunkData(majorHeartbeat.getAllChunkData(), nodes, nodeChunksMap, majorHeartbeat.getNodeInfo());
+        processChunkData(majorHeartbeat.getAllChunkData(), nodes, nodeChunksMap, majorHeartbeat.getNodeInfo());
     }
 
     private synchronized void processChunkData(String messageData,
                                                ConcurrentHashMap<String, NodeRecord> nodes,
-                                               ConcurrentHashMap<String, List<String>> nodeChunks, String nodeID) {
+                                               ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunks,
+                                               String nodeID) {
         String[] splitDataIntoChunks = messageData.split(",");
         for (String data : splitDataIntoChunks) {
 
@@ -86,14 +87,19 @@ public class ProcessHeartbeats {
             nodes.get(nodeID).getChunkInfo().put(
                     chunkName, new ChunkMetadata(chunkName, versionNumber, fileName, lastUpdatedTime));
 
-            if (nodeChunks.get(chunkName) == null) {
+            if (nodeChunks.get(fileName) == null) {
+                ConcurrentHashMap<String, List<String>> chunkNameMap = new ConcurrentHashMap<>();
                 ArrayList<String> nodeList = new ArrayList<>();
                 nodeList.add(nodeID);
 
-                nodeChunks.put(chunkName, nodeList);
+                chunkNameMap.put(chunkName, nodeList);
+
+                nodeChunks.put(fileName, chunkNameMap);
             } else {
-                if (!nodeChunks.get(chunkName).contains(nodeID)) {
-                    nodeChunks.get(chunkName).add(nodeID);
+                ConcurrentHashMap<String, List<String>> chunkMap = nodeChunks.get(fileName);
+
+                if (!chunkMap.get(chunkName).contains(nodeID)) {
+                    chunkMap.get(chunkName).add(nodeID);
                 }
             }
         }

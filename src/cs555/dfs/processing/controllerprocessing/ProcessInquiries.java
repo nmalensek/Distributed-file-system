@@ -1,6 +1,8 @@
 package cs555.dfs.processing.controllerprocessing;
 
 import cs555.dfs.messages.NodeInformation;
+import cs555.dfs.messages.Protocol;
+import cs555.dfs.messages.ReadFileInquiry;
 import cs555.dfs.messages.WriteFileInquiry;
 import cs555.dfs.node.NodeRecord;
 import cs555.dfs.transport.TCPSender;
@@ -8,6 +10,7 @@ import cs555.dfs.util.Splitter;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ProcessInquiries {
@@ -25,13 +28,15 @@ public class ProcessInquiries {
 
         NodeInformation destinationNodes = new NodeInformation();
         destinationNodes.setNodeInfo(determineTopThreeChunkServers(nodeMap));
+        destinationNodes.setInformationType(Protocol.CHUNK_DESTINATION);
 
         sender.send(clientAddressMap.get(clientAddress), destinationNodes.getBytes());
         System.out.println("Sent destination nodes: " + destinationNodes.getNodeInfo());
     }
 
-    public void processReadFileInquiry() {
-
+    public void processReadFileInquiry(ReadFileInquiry readFileInquiry,
+                                       ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> chunkMap) {
+        
     }
 
     private String determineTopThreeChunkServers(ConcurrentHashMap<String, NodeRecord> nodes) {

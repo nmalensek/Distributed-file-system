@@ -98,6 +98,11 @@ public class TCPReceiverThread extends Thread implements Protocol {
                         eventFactory.writeFileInquiryEvent(marshalledBytes);
                 node.onEvent(writeFileInquiryEvent, communicationSocket);
                 break;
+            case READ_INQUIRY:
+                Event<ReadFileInquiry> readFileInquiryEvent =
+                        eventFactory.readFileInquiryEvent(marshalledBytes);
+                node.onEvent(readFileInquiryEvent, communicationSocket);
+                break;
             default:
                 System.out.println("Something went horribly wrong, please restart.");
         }

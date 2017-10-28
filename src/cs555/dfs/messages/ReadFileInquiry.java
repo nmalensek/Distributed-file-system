@@ -2,12 +2,12 @@ package cs555.dfs.messages;
 
 import java.io.*;
 
-
-public class WriteFileInquiry implements Protocol, Event {
-    private int messageType = WRITE_INQUIRY;
+public class ReadFileInquiry implements Protocol, Event {
+    private int messageType = READ_INQUIRY;
     private String clientAddress;
+    private String filename;
 
-    public WriteFileInquiry getType() {
+    public ReadFileInquiry getType() {
         return this;
     }
 
@@ -19,6 +19,10 @@ public class WriteFileInquiry implements Protocol, Event {
     public String getClientAddress() { return clientAddress; }
 
     public void setClientAddress(String clientAddress) { this.clientAddress = clientAddress; }
+
+    public String getFilename() { return filename; }
+
+    public void setFilename(String filename) { this.filename = filename; }
 
     //marshalls bytes
     public byte[] getBytes() throws IOException {
@@ -33,6 +37,11 @@ public class WriteFileInquiry implements Protocol, Event {
         int clientLength = clientBytes.length;
         dataOutputStream.writeInt(clientLength);
         dataOutputStream.write(clientBytes);
+
+        byte[] filenameBytes = filename.getBytes();
+        int filenameLength = filenameBytes.length;
+        dataOutputStream.writeInt(filenameLength);
+        dataOutputStream.write(filenameBytes);
 
         dataOutputStream.flush();
         marshalledBytes = byteArrayOutputStream.toByteArray();
@@ -56,6 +65,12 @@ public class WriteFileInquiry implements Protocol, Event {
         dataInputStream.readFully(clientBytes);
 
         clientAddress = new String(clientBytes);
+
+        int filenameLength = dataInputStream.readInt();
+        byte[] filenameBytes = new byte[filenameLength];
+        dataInputStream.readFully(filenameBytes);
+
+        filename = new String(filenameBytes);
 
         byteArrayInputStream.close();
         dataInputStream.close();

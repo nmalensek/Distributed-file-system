@@ -61,5 +61,12 @@ public final class EventFactory {
         return writeFileInquiry;
     }
 
+    public static Event<ReadFileInquiry> readFileInquiryEvent(
+            byte[] marshalledBytes) throws IOException {
+        ReadFileInquiry readFileInquiry = new ReadFileInquiry();
+        readFileInquiry.readMessage(marshalledBytes);
+        return readFileInquiry;
+    }
+
 
 }

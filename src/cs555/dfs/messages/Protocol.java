@@ -2,6 +2,8 @@ package cs555.dfs.messages;
 
 public interface Protocol {
     int NODE_INFORMATION = 0;
+    int CHUNK_DESTINATION = 1;
+    int CHUNK_LOCATION = 2;
     int FILE = 6;
     int UPDATE = 9;
     int MINOR_HEARTBEAT = 10;

@@ -6,6 +6,7 @@ public class NodeInformation implements Protocol, Event {
     private int messageType = NODE_INFORMATION;
     private String nodeInfo;
     private long usableSpace;
+    private int informationType;
 
     public NodeInformation getType() {
         return this;
@@ -16,6 +17,9 @@ public class NodeInformation implements Protocol, Event {
 
     public long getUsableSpace() { return usableSpace; }
     public void setUsableSpace(long usableSpace) { this.usableSpace = usableSpace; }
+
+    public int getInformationType() { return informationType; }
+    public void setInformationType(int informationType) { this.informationType = informationType; }
 
     @Override
     public int getMessageType() {
@@ -30,6 +34,8 @@ public class NodeInformation implements Protocol, Event {
                 new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
 
         dataOutputStream.writeInt(messageType);
+
+        dataOutputStream.writeInt(informationType);
 
         byte[] infoBytes = nodeInfo.getBytes();
         int infoLength = infoBytes.length;
@@ -54,6 +60,8 @@ public class NodeInformation implements Protocol, Event {
                 new DataInputStream(new BufferedInputStream(byteArrayInputStream));
 
         messageType = dataInputStream.readInt();
+
+        informationType = dataInputStream.readInt();
 
         int infoLength = dataInputStream.readInt();
         byte[] infoBytes = new byte[infoLength];
