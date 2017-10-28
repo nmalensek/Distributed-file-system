@@ -21,10 +21,7 @@ public class ProcessInquiries {
 
     public void processWriteFileInquiry(ConcurrentHashMap<String, NodeRecord> nodeMap, WriteFileInquiry writeInquiry) throws IOException {
         String clientAddress = writeInquiry.getClientAddress();
-        if (clientAddressMap.get(clientAddress) == null) {
-            Socket clientSocket = new Socket(splitter.getHost(clientAddress), splitter.getPort(clientAddress));
-            clientAddressMap.put(clientAddress, clientSocket);
-        }
+        checkIfKnownClient(clientAddress);
 
         NodeInformation destinationNodes = new NodeInformation();
         destinationNodes.setNodeInfo(determineTopThreeChunkServers(nodeMap));
@@ -35,8 +32,17 @@ public class ProcessInquiries {
     }
 
     public void processReadFileInquiry(ReadFileInquiry readFileInquiry,
-                                       ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> chunkMap) {
-        
+                                       ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> chunkMap) throws IOException {
+        String clientAddress = readFileInquiry.getClientAddress();
+        checkIfKnownClient(clientAddress);
+
+        String filename = readFileInquiry.getFilename();
+
+        NodeInformation chunkLocations = new NodeInformation();
+        chunkLocations.setNodeInfo(findChunkLocations(chunkMap.get(filename)));
+        chunkLocations.setInformationType(Protocol.CHUNK_LOCATION);
+
+        sender.send(clientAddressMap.get(clientAddress), chunkLocations.getBytes());
     }
 
     private String determineTopThreeChunkServers(ConcurrentHashMap<String, NodeRecord> nodes) {
@@ -75,5 +81,31 @@ public class ProcessInquiries {
             }
         }
         return first + "," + second + "," + third;
+    }
+
+    private String findChunkLocations(ConcurrentHashMap<String, List<String>> chunkLocations) {
+        if (chunkLocations == null) {
+            return "";
+        }
+
+        StringBuilder locations = new StringBuilder();
+        locations.append(chunkLocations.keySet().size()); //add #chunks so client knows when it has all chunks
+        locations.append("#");
+        
+        for (String chunkName : chunkLocations.keySet()) {
+            locations.append(chunkName)
+                    .append("|")
+                    .append(chunkLocations.get(chunkName).get(0))
+                    .append(",");
+        }
+
+        return locations.toString();
+    }
+
+    private void checkIfKnownClient(String clientAddress) throws IOException {
+        if (clientAddressMap.get(clientAddress) == null) {
+            Socket clientSocket = new Socket(splitter.getHost(clientAddress), splitter.getPort(clientAddress));
+            clientAddressMap.put(clientAddress, clientSocket);
+        }
     }
 }
