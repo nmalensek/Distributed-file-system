@@ -90,13 +90,13 @@ public class ProcessInquiries {
 
         StringBuilder locations = new StringBuilder();
         locations.append(chunkLocations.keySet().size()); //add #chunks so client knows when it has all chunks
-        locations.append("#");
-        
+        locations.append("#!#");
+
         for (String chunkName : chunkLocations.keySet()) {
             locations.append(chunkName)
-                    .append("|")
+                    .append(":-:")
                     .append(chunkLocations.get(chunkName).get(0))
-                    .append(",");
+                    .append(",,");
         }
 
         return locations.toString();

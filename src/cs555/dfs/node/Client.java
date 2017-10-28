@@ -7,18 +7,12 @@ import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.Splitter;
 import cs555.dfs.util.TextInputThread;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.LinkedList;
-
-import static cs555.dfs.util.Constants.chunkSize;
+import java.util.TreeMap;
 
 public class Client implements Node {
 
@@ -31,11 +25,11 @@ public class Client implements Node {
     private TCPServerThread clientServer;
     private TCPSender clientSender = new TCPSender();
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
-    private Path filePath;
     private File file;
     private LinkedList<byte[]> chunkList = new LinkedList<>();
     private ClientChunkProcessor chunkProcessor = new ClientChunkProcessor(chunkList);
-    private HashMap<String, byte[]> receivedChunks = new HashMap<>();
+    private TreeMap<String, byte[]> receivedChunks = new TreeMap<>();
+    private int totalChunks;
     private int chunkNumber = 1;
 
     public Client() throws IOException {
@@ -70,8 +64,10 @@ public class Client implements Node {
             if (((NodeInformation) event).getInformationType() == Protocol.CHUNK_DESTINATION) {
                 sendChunk((NodeInformation) event);
             } else if (((NodeInformation) event).getInformationType() == Protocol.CHUNK_LOCATION) {
-                //request chunks
+                requestChunks((NodeInformation) event);
             }
+        } else if (event instanceof Chunk) {
+            //store in chunk map
         }
     }
 
@@ -85,6 +81,25 @@ public class Client implements Node {
         } else {
             System.out.println("Done sending chunks");
             chunkNumber = 1; //sent all the file's chunks, reset chunk counter
+        }
+    }
+
+    private void requestChunks(NodeInformation information) throws IOException {
+        String[] numChunksPlusChunks = information.getNodeInfo().split("#!#");
+        totalChunks = Integer.parseInt(numChunksPlusChunks[0]);
+        String[] chunkNamePlusLocation = numChunksPlusChunks[1].split(",,");
+        System.out.println(chunkNamePlusLocation.toString());
+
+        for (String nameAndLocation : chunkNamePlusLocation) {
+            String chunkName = nameAndLocation.split(":-:")[0];
+            String hostPort = nameAndLocation.split(":-:")[1];
+
+            ReadFileInquiry requestChunk = new ReadFileInquiry();
+            requestChunk.setClientAddress(thisNodeID);
+            requestChunk.setFilename(chunkName);
+
+            Socket chunkServerSocket = new Socket(split.getHost(hostPort), split.getPort(hostPort));
+            clientSender.send(chunkServerSocket, requestChunk.getBytes());
         }
     }
 
@@ -104,7 +119,6 @@ public class Client implements Node {
                 break;
             case "write":
                 try {
-                    filePath = Paths.get(text.split("\\s")[1]);
                     file = new File(text.split("\\s")[1]);
 
                     chunkProcessor.chunkFile(file);
