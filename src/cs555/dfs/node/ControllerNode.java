@@ -36,7 +36,7 @@ public class ControllerNode implements Node {
             System.out.println("got a node information");
             processHeartbeats.logNewEntry(nodesInOverlay, (NodeInformation) event);
         } else if (event instanceof MinorHeartbeatMessage) {
-            processHeartbeats.processMinorHeartbeat(chunkStorageMap, nodesInOverlay, (MinorHeartbeatMessage) event);
+                processHeartbeats.processMinorHeartbeat(chunkStorageMap, nodesInOverlay, (MinorHeartbeatMessage) event);
             System.out.println("got a minor heartbeat at " + System.currentTimeMillis());
         } else if (event instanceof MajorHeartbeatMessage) {
             processHeartbeats.processMajorHeartbeat(chunkStorageMap, nodesInOverlay, (MajorHeartbeatMessage) event);

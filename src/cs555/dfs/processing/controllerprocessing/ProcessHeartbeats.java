@@ -44,11 +44,9 @@ public class ProcessHeartbeats {
 
         if (nodes.get(heartbeat.getNodeInfo()) != null) {
             String newChunksMetadata = heartbeat.getNewChunkData();
-            if (newChunksMetadata.split(",").length != 0) {
+            updateNodeRecord(nodes.get(heartbeat.getNodeInfo()), heartbeat.getFreeSpace(),
+                    heartbeat.getNumChunks());
                 processChunkData(newChunksMetadata, nodes, nodeChunksMap, heartbeat.getNodeInfo());
-                updateNodeRecord(nodes.get(heartbeat.getNodeInfo()), heartbeat.getFreeSpace(),
-                        newChunksMetadata.split(",").length);
-            }
         } else { //Controller is recovering, request major heartbeat
 
             NodeRecord nodeInOverlay = registerNodeData(heartbeat.getNodeInfo(), heartbeat.getFreeSpace());
@@ -67,7 +65,8 @@ public class ProcessHeartbeats {
             NodeRecord nodeRecord = registerNodeData(majorHeartbeat.getNodeInfo(), majorHeartbeat.getFreeSpace());
             nodes.put(majorHeartbeat.getNodeInfo(), nodeRecord);
         }
-
+        updateNodeRecord(nodes.get(majorHeartbeat.getNodeInfo()), majorHeartbeat.getFreeSpace(),
+                majorHeartbeat.getNumChunks());
         processChunkData(majorHeartbeat.getAllChunkData(), nodes, nodeChunksMap, majorHeartbeat.getNodeInfo());
     }
 
@@ -75,6 +74,8 @@ public class ProcessHeartbeats {
                                                ConcurrentHashMap<String, NodeRecord> nodes,
                                                ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunks,
                                                String nodeID) {
+        if (messageData.isEmpty()) { return; }
+
         String[] splitDataIntoChunks = messageData.split(",");
         for (String data : splitDataIntoChunks) {
 
@@ -111,9 +112,9 @@ public class ProcessHeartbeats {
         return new NodeRecord(nodeID, nodeSocket, freeSpace);
     }
 
-    private synchronized void updateNodeRecord(NodeRecord nodeToUpdate, long updatedSpace, int numNewChunks) {
+    private synchronized void updateNodeRecord(NodeRecord nodeToUpdate, long updatedSpace, int numChunks) {
         nodeToUpdate.setUsableSpace(updatedSpace);
-        nodeToUpdate.setNumChunks(nodeToUpdate.getNumChunks() + numNewChunks);
+        nodeToUpdate.setNumChunks(numChunks);
     }
 
     private void sendTestResponse(Socket socket) throws IOException {
