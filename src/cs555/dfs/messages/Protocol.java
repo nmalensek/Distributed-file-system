@@ -4,6 +4,7 @@ public interface Protocol {
     int NODE_INFORMATION = 0;
     int CHUNK_DESTINATION = 1;
     int CHUNK_LOCATION = 2;
+    int CHUNK_REQUEST = 3;
     int FILE = 6;
     int UPDATE = 9;
     int MINOR_HEARTBEAT = 10;

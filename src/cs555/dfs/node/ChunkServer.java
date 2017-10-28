@@ -1,10 +1,7 @@
 package cs555.dfs.node;
 
 import cs555.dfs.heartbeat.ChunkServerHeartbeatThread;
-import cs555.dfs.messages.Chunk;
-import cs555.dfs.messages.Event;
-import cs555.dfs.messages.NodeInformation;
-import cs555.dfs.messages.RequestMajorHeartbeat;
+import cs555.dfs.messages.*;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.ChunkMetadata;
@@ -89,6 +86,8 @@ public class ChunkServer implements Node {
         } else if (event instanceof Chunk) {
             chunkProcessor.writeAndLogChunk((Chunk) event);
             updateUsableSpace();
+        } else if (event instanceof ReadFileInquiry) {
+            System.out.println("got a request for chunk: " + ((ReadFileInquiry) event).getFilename());
         }
 
     }

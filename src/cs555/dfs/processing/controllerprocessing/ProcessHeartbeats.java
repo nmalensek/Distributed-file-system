@@ -75,7 +75,7 @@ public class ProcessHeartbeats {
                                                ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunks,
                                                String nodeID) {
         if (messageData.isEmpty()) { return; }
-
+        System.out.println(messageData);
         String[] splitDataIntoChunks = messageData.split(",");
         for (String data : splitDataIntoChunks) {
 
@@ -99,8 +99,14 @@ public class ProcessHeartbeats {
             } else {
                 ConcurrentHashMap<String, List<String>> chunkMap = nodeChunks.get(fileName);
 
-                if (!chunkMap.get(chunkName).contains(nodeID)) {
-                    chunkMap.get(chunkName).add(nodeID);
+                if (chunkMap.get(chunkName) == null) {
+                    ArrayList<String> chunkLocationList = new ArrayList<>();
+                    chunkLocationList.add(nodeID);
+                    chunkMap.put(chunkName, chunkLocationList);
+                } else {
+                    if (!chunkMap.get(chunkName).contains(nodeID)) {
+                        chunkMap.get(chunkName).add(nodeID);
+                    }
                 }
             }
         }

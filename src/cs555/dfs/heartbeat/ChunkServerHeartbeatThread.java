@@ -32,6 +32,7 @@ public class ChunkServerHeartbeatThread extends Thread {
         MinorHeartbeatMessage heartbeatMessage = new MinorHeartbeatMessage();
         heartbeatMessage.setNodeInfo(owner.getNodeID());
         heartbeatMessage.setNewChunkData(getNewChunks());
+        System.out.println(getNewChunks());
         heartbeatMessage.setFreeSpace(owner.getFreeSpace());
         heartbeatMessage.setNumChunks(owner.getChunksResponsibleFor().size());
         controllerMessage.send(controllerSocket, heartbeatMessage.getBytes());

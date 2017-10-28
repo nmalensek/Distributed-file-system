@@ -1,7 +1,7 @@
 package cs555.dfs.node;
 
 import cs555.dfs.messages.*;
-import cs555.dfs.processing.ClientChunkProcessor;
+import cs555.dfs.processing.clientprocessing.ClientChunkProcessor;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.Splitter;
@@ -88,7 +88,7 @@ public class Client implements Node {
         String[] numChunksPlusChunks = information.getNodeInfo().split("#!#");
         totalChunks = Integer.parseInt(numChunksPlusChunks[0]);
         String[] chunkNamePlusLocation = numChunksPlusChunks[1].split(",,");
-        System.out.println(chunkNamePlusLocation.toString());
+        System.out.println(information.getNodeInfo());
 
         for (String nameAndLocation : chunkNamePlusLocation) {
             String chunkName = nameAndLocation.split(":-:")[0];
@@ -119,13 +119,13 @@ public class Client implements Node {
                 break;
             case "write":
                 try {
-                    file = new File(text.split("\\s")[1]);
-
+//                    file = new File(text.split("\\s")[1]);
+                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
                     writeFileInquiry.setClientAddress(thisNodeID);
                     clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
-                    System.out.println("Asking for destination...");
+                    System.out.println("Asking for destination for chunk " + chunkNumber);
                 } catch (StringIndexOutOfBoundsException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
                     System.out.println("Usage: write [filePath]");
                 }

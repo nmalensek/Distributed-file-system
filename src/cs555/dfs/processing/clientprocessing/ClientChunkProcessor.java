@@ -1,4 +1,4 @@
-package cs555.dfs.processing;
+package cs555.dfs.processing.clientprocessing;
 
 import cs555.dfs.messages.Chunk;
 import cs555.dfs.messages.NodeInformation;
