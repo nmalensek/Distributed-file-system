@@ -77,6 +77,7 @@ public class Client implements Node {
             System.out.println(((Chunk) event).getFileName());
             if (receivedChunks.keySet().size() == totalChunks) {
                 mergeChunks();
+                receivedChunks.clear();
             }
         }
     }
@@ -141,7 +142,7 @@ public class Client implements Node {
                 break;
             case "write":
                 try {
-                    file = new File(text.split("\\s")[1]);
+//                    file = new File(text.split("\\s")[1]);
                     
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();

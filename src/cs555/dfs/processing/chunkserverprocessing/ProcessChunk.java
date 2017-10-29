@@ -7,6 +7,7 @@ import cs555.dfs.transport.TCPSender;
 import cs555.dfs.util.ChunkMetadata;
 import cs555.dfs.util.Splitter;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -63,23 +64,20 @@ public class ProcessChunk {
     private synchronized void writeHashForSlices(Chunk fileChunk) throws IOException {
         byte[] chunkBytes = fileChunk.getChunkByteArray();
 
-        byte[] slice = new byte[sliceSize];
-
         int index = 0;
         int maximum = chunkBytes.length;
+        int writeSize = sliceSize;
 
         FileWriter fileWriter = new FileWriter(storageDirectory + fileChunk.getFileName() + integrity);
 
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
         while (index < maximum) {
-            for (int i = 0; i < slice.length; i++) {
-                try {
-                    slice[i] = chunkBytes[index];
-                    index++;
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    break;
-                }
-            }
-            fileWriter.write(ComputeHash.SHA1FromBytes(slice) + "\n");
+            if (maximum - index < writeSize) { writeSize = maximum - index; }
+            byteArrayOutputStream.write(chunkBytes, index, writeSize);
+            fileWriter.write(ComputeHash.SHA1FromBytes(byteArrayOutputStream.toByteArray()) + "\n");
+            index += byteArrayOutputStream.size();
+            byteArrayOutputStream.reset();
         }
         fileWriter.close();
     }
