@@ -13,4 +13,5 @@ public interface Protocol {
     int WRITE_INQUIRY = 13;
     int CHUNK = 14;
     int REQUEST_MAJOR_HEARTBEAT = 99;
+    int DISCONNECT = 100;
 }

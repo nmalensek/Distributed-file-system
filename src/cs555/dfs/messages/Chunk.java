@@ -1,7 +1,6 @@
 package cs555.dfs.messages;
 
 import java.io.*;
-import java.nio.file.Files;
 
 public class Chunk implements Protocol, Event {
 

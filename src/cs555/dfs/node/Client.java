@@ -8,6 +8,8 @@ import cs555.dfs.util.Splitter;
 import cs555.dfs.util.TextInputThread;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
@@ -26,9 +28,10 @@ public class Client implements Node {
     private TCPSender clientSender = new TCPSender();
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
     private File file;
+    private String filenameToRead;
     private LinkedList<byte[]> chunkList = new LinkedList<>();
     private ClientChunkProcessor chunkProcessor = new ClientChunkProcessor(chunkList);
-    private TreeMap<String, byte[]> receivedChunks = new TreeMap<>();
+    private final TreeMap<String, byte[]> receivedChunks = new TreeMap<>();
     private int totalChunks;
     private int chunkNumber = 1;
 
@@ -67,7 +70,14 @@ public class Client implements Node {
                 requestChunks((NodeInformation) event);
             }
         } else if (event instanceof Chunk) {
-            //store in chunk map
+            synchronized (receivedChunks) {
+                receivedChunks.put(((Chunk) event).getFileName(), ((Chunk) event).getChunkByteArray());
+                System.out.println(((Chunk) event).getChunkByteArray().length);
+            }
+            System.out.println(((Chunk) event).getFileName());
+            if (receivedChunks.keySet().size() == totalChunks) {
+                mergeChunks();
+            }
         }
     }
 
@@ -80,6 +90,7 @@ public class Client implements Node {
             clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
         } else {
             System.out.println("Done sending chunks");
+            chunkProcessor.disconnectFromDestinations();
             chunkNumber = 1; //sent all the file's chunks, reset chunk counter
         }
     }
@@ -87,6 +98,7 @@ public class Client implements Node {
     private void requestChunks(NodeInformation information) throws IOException {
         String[] numChunksPlusChunks = information.getNodeInfo().split("#!#");
         totalChunks = Integer.parseInt(numChunksPlusChunks[0]);
+        System.out.println(totalChunks);
         String[] chunkNamePlusLocation = numChunksPlusChunks[1].split(",,");
         System.out.println(information.getNodeInfo());
 
@@ -103,15 +115,25 @@ public class Client implements Node {
         }
     }
 
+    private void mergeChunks() throws IOException {
+        FileOutputStream fileOutputStream = new FileOutputStream(filenameToRead);
+        for (String chunkName : receivedChunks.keySet()) {
+            fileOutputStream.write(receivedChunks.get(chunkName));
+        }
+    }
+
     @Override
     public void processText(String text) throws IOException {
         String command = text.split("\\s")[0];
         switch (command) {
             case "read":
                 try {
+//                    filenameToRead = text.split("\\s")[1];
+                    filenameToRead = "animals_of_the_past_merged.txt";
                     ReadFileInquiry readFileInquiry = new ReadFileInquiry();
                     readFileInquiry.setClientAddress(thisNodeID);
-                    readFileInquiry.setFilename(text.split("\\s")[1]);
+//                    readFileInquiry.setFilename(text.split("\\s")[1]);
+                    readFileInquiry.setFilename("animals_of_the_past.txt");
                     clientSender.send(controllerNodeSocket, readFileInquiry.getBytes());
                 } catch (StringIndexOutOfBoundsException e) {
                     System.out.println("Usage: read [file name]");
@@ -119,8 +141,8 @@ public class Client implements Node {
                 break;
             case "write":
                 try {
-//                    file = new File(text.split("\\s")[1]);
-                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
+                    file = new File(text.split("\\s")[1]);
+                    
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
                     writeFileInquiry.setClientAddress(thisNodeID);

@@ -103,6 +103,10 @@ public class TCPReceiverThread extends Thread implements Protocol {
                         eventFactory.readFileInquiryEvent(marshalledBytes);
                 node.onEvent(readFileInquiryEvent, communicationSocket);
                 break;
+            case DISCONNECT:
+                System.out.println("Closing socket...");
+                    communicationSocket.close();
+                break;
             default:
                 System.out.println("Something went horribly wrong, please restart.");
         }

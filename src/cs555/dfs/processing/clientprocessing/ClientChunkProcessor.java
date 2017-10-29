@@ -1,6 +1,7 @@
 package cs555.dfs.processing.clientprocessing;
 
 import cs555.dfs.messages.Chunk;
+import cs555.dfs.messages.Disconnect;
 import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.node.Client;
 import cs555.dfs.transport.TCPSender;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import static cs555.dfs.util.Constants.chunkSize;
@@ -20,6 +22,7 @@ public class ClientChunkProcessor {
     private LinkedList<byte[]> chunkList;
     private Splitter split = new Splitter();
     private TCPSender chunkSender = new TCPSender();
+    private ArrayList<Socket> chunkDestinations = new ArrayList<>();
 
     public ClientChunkProcessor(LinkedList<byte[]> chunkList) {
         this.chunkList = chunkList;
@@ -73,6 +76,13 @@ public class ClientChunkProcessor {
         chunkSender.send(destinationSocket, chunk.getBytes());
         System.out.println("Sent " + chunk.getFileName() + " to " + destinationNodes[0]);
         client.setChunkNumber(chunkNumber + 1);
-        destinationSocket.close();
+        chunkDestinations.add(destinationSocket);
+    }
+
+    public void disconnectFromDestinations() throws IOException {
+        Disconnect dc = new Disconnect();
+        for (Socket socket : chunkDestinations) {
+            chunkSender.send(socket, dc.getBytes());
+        }
     }
 }

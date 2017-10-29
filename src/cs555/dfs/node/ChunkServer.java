@@ -2,6 +2,7 @@ package cs555.dfs.node;
 
 import cs555.dfs.heartbeat.ChunkServerHeartbeatThread;
 import cs555.dfs.messages.*;
+import cs555.dfs.processing.chunkserverprocessing.RetrieveChunk;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.ChunkMetadata;
@@ -33,6 +34,7 @@ public class ChunkServer implements Node {
     private ProcessChunk chunkProcessor = new ProcessChunk(this, storageDirectory);
     private ChunkServerHeartbeatThread chunkServerHeartbeatThread =
             new ChunkServerHeartbeatThread(controllerNodeSocket, this, metadataFilepath);
+    private RetrieveChunk retrieveChunk = new RetrieveChunk();
 
     public ChunkServer() throws IOException {
 
@@ -88,6 +90,7 @@ public class ChunkServer implements Node {
             updateUsableSpace();
         } else if (event instanceof ReadFileInquiry) {
             System.out.println("got a request for chunk: " + ((ReadFileInquiry) event).getFilename());
+            retrieveChunk.retrieveChunk(((ReadFileInquiry) event));
         }
 
     }

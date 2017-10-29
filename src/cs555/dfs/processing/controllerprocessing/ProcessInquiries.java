@@ -98,7 +98,7 @@ public class ProcessInquiries {
                     .append(chunkLocations.get(chunkName).get(0))
                     .append(",,");
         }
-
+        System.out.println(locations.toString());
         return locations.toString();
     }
 

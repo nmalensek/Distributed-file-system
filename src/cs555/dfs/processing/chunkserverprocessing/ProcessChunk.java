@@ -34,7 +34,7 @@ public class ProcessChunk {
         metadataWriter.flush();
     }
 
-    public void writeAndLogChunk(Chunk chunkInformation) throws IOException {
+    public synchronized void writeAndLogChunk(Chunk chunkInformation) throws IOException {
         String fullFileName = chunkInformation.getFileName();
         String originalFileName = fullFileName.substring(0, fullFileName.lastIndexOf('_'));
         long timestamp = System.currentTimeMillis();
@@ -60,7 +60,7 @@ public class ProcessChunk {
      * @param fileChunk Chunk of a split file.
      * @throws IOException
      */
-    private void writeHashForSlices(Chunk fileChunk) throws IOException {
+    private synchronized void writeHashForSlices(Chunk fileChunk) throws IOException {
         byte[] chunkBytes = fileChunk.getChunkByteArray();
 
         byte[] slice = new byte[sliceSize];
@@ -89,7 +89,7 @@ public class ProcessChunk {
      * If the next node is the last node, nothing's added and this method's skipped at the final node.
      * @param chunk Chunk message that originated from client.
      */
-    private void forwardToNextNode(Chunk chunk) throws IOException {
+    private synchronized void forwardToNextNode(Chunk chunk) throws IOException {
         if (!chunk.getReplicationNodes().isEmpty()) {
             String[] nodeArray = chunk.getReplicationNodes().split(",");
             String nextNode = nodeArray[0];
