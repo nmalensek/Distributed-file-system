@@ -16,8 +16,9 @@ public class RetrieveChunk {
 
     private TCPSender sender = new TCPSender();
     private Splitter splitter = new Splitter();
-    private ArrayList<String> checkedIntegrityData = new ArrayList<>();
-    private boolean okToSend = false;
+    private int corruptedSlice;
+    private boolean corrupted = false;
+    private HandleSliceCorruption handleCorruption = new HandleSliceCorruption();
 
     public synchronized void retrieveChunk(ReadFileInquiry chunkRequest) throws IOException {
         String chunkName = chunkRequest.getFilename();
@@ -36,12 +37,21 @@ public class RetrieveChunk {
         try (FileInputStream fileInputStream = new FileInputStream(storageDirectory + chunkName)) {
             while ((read = fileInputStream.read(chunkArray)) != -1) {
                 byteArrayOutputStream.write(chunkArray, 0, read);
-                retrievedChunk.setChunkByteArray(byteArrayOutputStream.toByteArray());
                 checkChunkSlices(byteArrayOutputStream.toByteArray(), chunkName);
+                if (!corrupted) {
+                    retrievedChunk.setChunkByteArray(byteArrayOutputStream.toByteArray());
 //                sender.send(clientSocket, retrievedChunk.getBytes());
-                byteArrayOutputStream.reset();
-//                System.out.println("Sent chunk " + chunkName);
+                System.out.println("Sent chunk " + chunkName);
+                } else {
+                    System.out.println("Corruption detected in slice " + corruptedSlice +
+                            ", initiating recovery.");
+                }
+//                byteArrayOutputStream.reset();
             }
+        }
+        if (corrupted) {
+            handleCorruption.overWriteGoodSlices(byteArrayOutputStream.toByteArray(), corruptedSlice, chunkName);
+            //initiate recovery, send chunk to requester once replaced
         }
     }
 
@@ -50,11 +60,12 @@ public class RetrieveChunk {
         ArrayList<String> writtenHashes = getLoggedIntegrityData(chunkName);
         ArrayList<String> memoryHashes = getCurrentIntegrityHashes(retrievedChunk);
 
-        System.out.println(writtenHashes.equals(memoryHashes));
-        if (!writtenHashes.equals(memoryHashes)) {
-            System.out.println("Corruption detected in chunk " + chunkName);
-        } else {
-            System.out.println("Sent chunk " + chunkName);
+        for (int i = 0; i < writtenHashes.size(); i++) {
+            if (!memoryHashes.contains(writtenHashes.get(i))) {
+                corruptedSlice = i;
+                corrupted = true;
+                break;
+            }
         }
     }
 
