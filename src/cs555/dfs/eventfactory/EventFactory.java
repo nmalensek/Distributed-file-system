@@ -74,4 +74,10 @@ public final class EventFactory {
         return requestChunk;
     }
 
+    public static Event<CleanSlices> cleanSlicesEvent(byte[] marshalledBytes) throws IOException {
+        CleanSlices cleanSlices = new CleanSlices();
+        cleanSlices.readMessage(marshalledBytes);
+        return cleanSlices;
+    }
+
 }

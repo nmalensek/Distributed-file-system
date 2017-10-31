@@ -1,5 +1,6 @@
 package cs555.dfs.processing.chunkserverprocessing;
 
+import cs555.dfs.messages.CleanSlices;
 import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.RequestChunk;
 import cs555.dfs.transport.TCPSender;
@@ -70,5 +71,14 @@ public class HandleSliceCorruption {
 
         TCPSender sender = new TCPSender();
         sender.send(holderSocket, chunkRequest.getBytes());
+    }
+
+    public synchronized void writeCleanSlices(CleanSlices cleanSlices) throws IOException {
+        String chunk = cleanSlices.getChunkName();
+        byte[] sliceBytes = cleanSlices.getSlicesByteArray();
+
+        try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunk, true)) {
+            fileOutputStream.write(sliceBytes);
+        }
     }
 }

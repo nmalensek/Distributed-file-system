@@ -2,7 +2,7 @@ package cs555.dfs.node;
 
 import cs555.dfs.heartbeat.ChunkServerHeartbeatThread;
 import cs555.dfs.messages.*;
-import cs555.dfs.processing.chunkserverprocessing.HandleSliceCorruption;
+import cs555.dfs.processing.chunkserverprocessing.GetCleanSlice;
 import cs555.dfs.processing.chunkserverprocessing.RetrieveChunk;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static cs555.dfs.util.Constants.metadataFilepath;
 import static cs555.dfs.util.Constants.storageDirectory;
+import static cs555.dfs.util.Constants.storageSpaceDirectory;
 
 public class ChunkServer implements Node {
 
@@ -62,14 +63,14 @@ public class ChunkServer implements Node {
                     thisNodeID = thisNodeHost + ":" + thisNodePort;
                     break;
                 }
-            } catch (NullPointerException npe) {
+            } catch (NullPointerException ignored) {
 
             }
         }
     }
 
     private void updateUsableSpace() {
-        File tmpDirectory = new File(storageDirectory);
+        File tmpDirectory = new File(storageSpaceDirectory);
         freeSpace = tmpDirectory.getUsableSpace();
     }
 
@@ -99,7 +100,10 @@ public class ChunkServer implements Node {
             System.out.println("got a request for chunk: " + ((ReadFileInquiry) event).getFilename());
             retrieveChunk.retrieveChunk(((ReadFileInquiry) event), this);
         } else if (event instanceof RequestChunk) {
-
+            GetCleanSlice getCleanSlice = new GetCleanSlice((RequestChunk) event);
+            getCleanSlice.retrieveCleanSlice();
+        } else if (event instanceof CleanSlices) {
+            retrieveChunk.writeSlices((CleanSlices) event);
         }
 
     }

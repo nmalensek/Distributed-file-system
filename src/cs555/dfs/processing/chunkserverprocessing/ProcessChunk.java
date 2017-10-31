@@ -7,10 +7,7 @@ import cs555.dfs.transport.TCPSender;
 import cs555.dfs.util.ChunkMetadata;
 import cs555.dfs.util.Splitter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 import static cs555.dfs.util.Constants.integrity;
@@ -23,7 +20,6 @@ public class ProcessChunk {
     private String storageDirectory;
     private Splitter splitter = new Splitter();
     private TCPSender forwardChunk = new TCPSender();
-    private FileWriter metadataWriter = new FileWriter(metadataFilepath);
 
     public ProcessChunk(ChunkServer owner, String storageDirectory) throws IOException {
         this.owner = owner;
@@ -31,8 +27,9 @@ public class ProcessChunk {
     }
 
     private void writeMetadata(String metadata) throws IOException {
-        metadataWriter.write(metadata + "\n");
-        metadataWriter.flush();
+        try(FileWriter metadataWriter = new FileWriter(metadataFilepath)) {
+            metadataWriter.write(metadata + "\n");
+        }
     }
 
     public synchronized void writeAndLogChunk(Chunk chunkInformation) throws IOException {

@@ -2,6 +2,7 @@ package cs555.dfs.processing.chunkserverprocessing;
 
 import cs555.dfs.hash.ComputeHash;
 import cs555.dfs.messages.Chunk;
+import cs555.dfs.messages.CleanSlices;
 import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.messages.ReadFileInquiry;
 import cs555.dfs.node.ChunkServer;
@@ -112,5 +113,9 @@ public class RetrieveChunk {
 
     public void askForCleanChunk(NodeInformation message, String nodeID) throws IOException {
         handleCorruption.requestChunkFromServer(message, nodeID, corruptedChunkName, corruptedSlice);
+    }
+
+    public void writeSlices(CleanSlices message) throws IOException {
+        handleCorruption.writeCleanSlices(message);
     }
 }
