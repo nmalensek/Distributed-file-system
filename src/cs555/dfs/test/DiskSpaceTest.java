@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
-import static cs555.dfs.util.Constants.metadataFilepath;
 import static cs555.dfs.util.Constants.storageSpaceDirectory;
 
 public class DiskSpaceTest {

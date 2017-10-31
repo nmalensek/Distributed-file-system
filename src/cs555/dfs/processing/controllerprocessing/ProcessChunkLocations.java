@@ -25,7 +25,7 @@ public class ProcessChunkLocations {
         String chunkName = message.getChunkName();
         String fileName = chunkName.substring(0, chunkName.lastIndexOf('_'));
         String returnAddress = message.getChunkServerAddress();
-        System.out.println("Getting chunk " + chunkName + "of file " + fileName);
+        System.out.println("Getting chunk " + chunkName);
 
         List<String> locations = chunkMap.get(fileName).get(chunkName);
         StringBuilder locationString = new StringBuilder();

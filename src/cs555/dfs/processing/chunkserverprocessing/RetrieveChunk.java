@@ -46,13 +46,13 @@ public class RetrieveChunk {
                 checkChunkSlices(byteArrayOutputStream.toByteArray(), chunkName);
                 if (!corrupted) {
                     retrievedChunk.setChunkByteArray(byteArrayOutputStream.toByteArray());
-//                sender.send(clientSocket, retrievedChunk.getBytes());
+                sender.send(clientSocket, retrievedChunk.getBytes());
                 System.out.println("Sent chunk " + chunkName);
                 } else {
                     System.out.println("Corruption detected in slice " + corruptedSlice +
-                            " of chunk + " + corruptedChunkName + ", initiating recovery.");
+                            " of chunk " + corruptedChunkName + ", initiating recovery.");
                 }
-//                byteArrayOutputStream.reset();
+                byteArrayOutputStream.reset();
             }
         }
         if (corrupted) {

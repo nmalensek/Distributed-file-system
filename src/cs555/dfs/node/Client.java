@@ -72,12 +72,11 @@ public class Client implements Node {
         } else if (event instanceof Chunk) {
             synchronized (receivedChunks) {
                 receivedChunks.put(((Chunk) event).getFileName(), ((Chunk) event).getChunkByteArray());
-                System.out.println(((Chunk) event).getChunkByteArray().length);
-            }
-            System.out.println(((Chunk) event).getFileName());
-            if (receivedChunks.keySet().size() == totalChunks) {
-                mergeChunks();
-                receivedChunks.clear();
+                System.out.println(receivedChunks.size() + " chunks of " + ((Chunk) event).getFileName());
+                if (receivedChunks.keySet().size() == totalChunks) {
+                    mergeChunks();
+                    receivedChunks.clear();
+                }
             }
         }
     }

@@ -9,8 +9,7 @@ import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.ChunkMetadata;
 import cs555.dfs.processing.chunkserverprocessing.ProcessChunk;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.Inet4Address;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -104,6 +103,34 @@ public class ChunkServer implements Node {
             getCleanSlice.retrieveCleanSlice();
         } else if (event instanceof CleanSlices) {
             retrieveChunk.writeSlices((CleanSlices) event);
+            updateMetaData((CleanSlices) event);
+        }
+
+    }
+
+    private synchronized void updateMetaData(CleanSlices message) throws IOException {
+        ArrayList<String> metadataList = new ArrayList<>();
+
+        File metaDataFile = new File(metadataFilepath);
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(metaDataFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.split(":")[0].equals(message.getChunkName())) {
+                    String[] splitLine = line.split(":");
+                    int version = Integer.parseInt(splitLine[1]) + 1;
+                    String updatedLine = splitLine[0] + ":" + version + ":" + splitLine[2] + ":" + System.currentTimeMillis();
+                    metadataList.add(updatedLine);
+                } else {
+                    metadataList.add(line);
+                }
+            }
+        }
+
+        try(FileWriter metadataWriter = new FileWriter(metadataFilepath)) {
+            for (String metadata : metadataList) {
+                metadataWriter.write(metadata + "\n");
+            }
         }
 
     }

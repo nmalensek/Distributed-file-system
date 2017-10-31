@@ -26,12 +26,6 @@ public class ProcessChunk {
         this.storageDirectory = storageDirectory;
     }
 
-    private void writeMetadata(String metadata) throws IOException {
-        try(FileWriter metadataWriter = new FileWriter(metadataFilepath)) {
-            metadataWriter.write(metadata + "\n");
-        }
-    }
-
     public synchronized void writeAndLogChunk(Chunk chunkInformation) throws IOException {
         String fullFileName = chunkInformation.getFileName();
         String originalFileName = fullFileName.substring(0, fullFileName.lastIndexOf('_'));
@@ -53,12 +47,18 @@ public class ProcessChunk {
         }
     }
 
+    private void writeMetadata(String metadata) throws IOException {
+        try(FileWriter metadataWriter = new FileWriter(metadataFilepath)) {
+            metadataWriter.write(metadata + "\n");
+        }
+    }
+
     /**
      * Given a byte array, get the SHA-1 hash for each 8kb slice and write it to a file.
      * @param fileChunk Chunk of a split file.
      * @throws IOException
      */
-    private synchronized void writeHashForSlices(Chunk fileChunk) throws IOException {
+    public synchronized void writeHashForSlices(Chunk fileChunk) throws IOException {
         byte[] chunkBytes = fileChunk.getChunkByteArray();
 
         int index = 0;
