@@ -2,6 +2,7 @@ package cs555.dfs.node;
 
 import cs555.dfs.heartbeat.ChunkServerHeartbeatThread;
 import cs555.dfs.messages.*;
+import cs555.dfs.processing.chunkserverprocessing.HandleSliceCorruption;
 import cs555.dfs.processing.chunkserverprocessing.RetrieveChunk;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
@@ -25,6 +26,7 @@ public class ChunkServer implements Node {
     private static String controllerHost;
     private int thisNodePort;
     private static String thisNodeHost;
+    private String thisNodeID;
     private long freeSpace;
     private TCPServerThread serverThread;
     private TCPSender sender = new TCPSender();
@@ -57,6 +59,7 @@ public class ChunkServer implements Node {
             try {
                 thisNodePort = serverThread.getPortNumber();
                 if (thisNodePort != 0) {
+                    thisNodeID = thisNodeHost + ":" + thisNodePort;
                     break;
                 }
             } catch (NullPointerException npe) {
@@ -74,7 +77,7 @@ public class ChunkServer implements Node {
         chunkServerHeartbeatThread.start();
         //register with controller
         NodeInformation nodeInformation = new NodeInformation();
-        nodeInformation.setNodeInfo(thisNodeHost + ":" + thisNodePort);
+        nodeInformation.setNodeInfo(thisNodeID);
         nodeInformation.setUsableSpace(freeSpace);
         sender.send(controllerNodeSocket, nodeInformation.getBytes());
     }
@@ -82,7 +85,11 @@ public class ChunkServer implements Node {
     @Override
     public void onEvent(Event event, Socket destinationSocket) throws IOException {
         if (event instanceof NodeInformation) {
-            System.out.println("got a registration reply");
+            if (((NodeInformation) event).getInformationType() == Protocol.CHUNK_LOCATION) {
+                retrieveChunk.askForCleanChunk((NodeInformation) event, thisNodeID);
+            } else {
+                System.out.println("got a registration reply");
+            }
         } else if (event instanceof RequestMajorHeartbeat) {
             chunkServerHeartbeatThread.sendMajorHeartbeat();
         } else if (event instanceof Chunk) {
@@ -90,18 +97,22 @@ public class ChunkServer implements Node {
             updateUsableSpace();
         } else if (event instanceof ReadFileInquiry) {
             System.out.println("got a request for chunk: " + ((ReadFileInquiry) event).getFilename());
-            retrieveChunk.retrieveChunk(((ReadFileInquiry) event));
+            retrieveChunk.retrieveChunk(((ReadFileInquiry) event), this);
+        } else if (event instanceof RequestChunk) {
+
         }
 
     }
 
-    public String getNodeID() { return thisNodeHost + ":" + thisNodePort; }
+    public String getNodeID() { return thisNodeID; }
 
     public ConcurrentHashMap<String, ChunkMetadata> getChunksResponsibleFor() { return chunksResponsibleFor; }
 
     public List<String> getNewChunksResponsibleFor() { return newChunksResponsibleFor; }
 
     public long getFreeSpace() { return freeSpace; }
+
+    public Socket getControllerNodeSocket() { return controllerNodeSocket; }
 
     public static void main(String[] args) {
         try {

@@ -68,5 +68,10 @@ public final class EventFactory {
         return readFileInquiry;
     }
 
+    public static Event<RequestChunk> requestChunkEvent(byte[] marshalledBytes) throws IOException {
+        RequestChunk requestChunk = new RequestChunk();
+        requestChunk.readMessage(marshalledBytes);
+        return requestChunk;
+    }
 
 }

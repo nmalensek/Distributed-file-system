@@ -3,6 +3,7 @@ package cs555.dfs.transport;
 import cs555.dfs.eventfactory.EventFactory;
 import cs555.dfs.messages.*;
 import cs555.dfs.node.Node;
+import sun.misc.Request;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -102,6 +103,11 @@ public class TCPReceiverThread extends Thread implements Protocol {
                 Event<ReadFileInquiry> readFileInquiryEvent =
                         eventFactory.readFileInquiryEvent(marshalledBytes);
                 node.onEvent(readFileInquiryEvent, communicationSocket);
+                break;
+            case CHUNK_REQUEST:
+                Event<RequestChunk> requestChunkEvent =
+                        eventFactory.requestChunkEvent(marshalledBytes);
+                node.onEvent(requestChunkEvent, communicationSocket);
                 break;
             case DISCONNECT:
                 System.out.println("Closing socket...");

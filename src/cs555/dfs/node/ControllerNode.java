@@ -1,6 +1,7 @@
 package cs555.dfs.node;
 
 import cs555.dfs.messages.*;
+import cs555.dfs.processing.controllerprocessing.ProcessChunkLocations;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.processing.controllerprocessing.ProcessHeartbeats;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,6 +48,10 @@ public class ControllerNode implements Node {
             processInquiries.processWriteFileInquiry(nodesInOverlay, (WriteFileInquiry) event);
         } else if (event instanceof ReadFileInquiry) {
             processInquiries.processReadFileInquiry((ReadFileInquiry) event, chunkStorageMap);
+        } else if (event instanceof RequestChunk) {
+            ProcessChunkLocations locations = new ProcessChunkLocations();
+            locations.setUpInformation(chunkStorageMap, nodesInOverlay);
+            locations.sendChunkLocations((RequestChunk) event, controllerSender);
         }
     }
 
