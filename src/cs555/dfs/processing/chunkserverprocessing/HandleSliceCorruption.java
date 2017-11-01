@@ -40,17 +40,19 @@ public class HandleSliceCorruption {
     public synchronized void requestChunkLocation(TCPSender controllerSender,
                                                   String chunkName,
                                                   String sourceServer,
-                                                  Socket controllerSocket) throws IOException {
+                                                  Socket controllerSocket, String clientID) throws IOException {
         RequestChunk requestChunk = new RequestChunk();
         requestChunk.setChunkName(chunkName);
-        requestChunk.setChunkServerAddress(sourceServer);
+        requestChunk.setChunkServerAddress(sourceServer + ":" + clientID);
 
         controllerSender.send(controllerSocket, requestChunk.getBytes());
     }
 
     public synchronized void requestChunkFromServer(NodeInformation message, String thisNodeID, String corruptedChunkName,
                                                     int corruptedSliceNumber) throws IOException {
-        String[] chunkLocations = message.getNodeInfo().split(",");
+        String originalRequester = message.getNodeInfo().split("::")[0];
+        String serverAddresses = message.getNodeInfo().split("::")[1];
+        String[] chunkLocations = serverAddresses.split(",");
         String chunkHolder = "";
         for (String nodeID : chunkLocations) {
             if (!nodeID.equals(thisNodeID)) {
@@ -58,13 +60,13 @@ public class HandleSliceCorruption {
                 break;
             }
         }
-        prepareAndSendMessage(thisNodeID, corruptedChunkName, corruptedSliceNumber, chunkHolder);
+        prepareAndSendSliceRequest(thisNodeID, corruptedChunkName, corruptedSliceNumber, chunkHolder, originalRequester);
     }
 
-    private synchronized void prepareAndSendMessage(String thisNodeID, String corruptedChunkName, int corruptedSliceNumber,
-                                                    String chunkHolder) throws IOException {
+    private synchronized void prepareAndSendSliceRequest(String thisNodeID, String corruptedChunkName, int corruptedSliceNumber,
+                                                         String chunkHolder, String clientID) throws IOException {
         RequestChunk chunkRequest = new RequestChunk();
-        chunkRequest.setChunkServerAddress(thisNodeID);
+        chunkRequest.setChunkServerAddress(thisNodeID + "::" + clientID);
         chunkRequest.setChunkName(corruptedChunkName + ":-:" + corruptedSliceNumber);
 
         Socket holderSocket = new Socket(splitter.getHost(chunkHolder), splitter.getPort(chunkHolder));

@@ -24,7 +24,7 @@ public class GetCleanSlice {
     public GetCleanSlice(RequestChunk chunkRequest) {
         chunkName = chunkRequest.getChunkName().split(":-:")[0];
         sliceNumber = Integer.parseInt(chunkRequest.getChunkName().split(":-:")[1]);
-        requestingServer = chunkRequest.getChunkServerAddress();
+        requestingServer = chunkRequest.getChunkServerAddress().split("::")[0];
         if (sliceNumber == 0) {
             byteStartIndex = 0;
         } else {
@@ -32,7 +32,7 @@ public class GetCleanSlice {
         }
     }
 
-    public synchronized void retrieveCleanSlice() throws IOException {
+    public synchronized void retrieveCleanSlice(String clientID) throws IOException {
 
         try(RandomAccessFile file = new RandomAccessFile(storageDirectory + chunkName, "r")) {
             file.seek(byteStartIndex);
@@ -40,14 +40,15 @@ public class GetCleanSlice {
             byte[] cleanSlices = new byte[remainingBytes];
             file.readFully(cleanSlices);
 
-            sendSlices(cleanSlices);
+            sendSlices(cleanSlices, clientID);
         }
     }
 
-    private synchronized void sendSlices(byte[] sliceArray) throws IOException {
+    private synchronized void sendSlices(byte[] sliceArray, String originalClient) throws IOException {
         CleanSlices cleanSlices = new CleanSlices();
         cleanSlices.setChunkName(chunkName);
         cleanSlices.setSlicesByteArray(sliceArray);
+        cleanSlices.setOriginalClientID(originalClient);
 
 
         TCPSender sender = new TCPSender();

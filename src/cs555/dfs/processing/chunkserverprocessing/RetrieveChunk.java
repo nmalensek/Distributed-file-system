@@ -28,8 +28,8 @@ public class RetrieveChunk {
     public synchronized void retrieveChunk(ReadFileInquiry chunkRequest, ChunkServer parent) throws IOException {
         this.parent = parent;
         String chunkName = chunkRequest.getFilename();
-        String requestor = chunkRequest.getClientAddress();
-        Socket clientSocket = new Socket(splitter.getHost(requestor), splitter.getPort(requestor));
+        String requester = chunkRequest.getClientAddress();
+        Socket clientSocket = new Socket(splitter.getHost(requester), splitter.getPort(requester));
 
         Chunk retrievedChunk = new Chunk();
         retrievedChunk.setFileName(chunkName);
@@ -56,9 +56,10 @@ public class RetrieveChunk {
             }
         }
         if (corrupted) {
+            corrupted = false;
             handleCorruption.overWriteGoodSlices(byteArrayOutputStream.toByteArray(), corruptedSlice, chunkName);
             handleCorruption.requestChunkLocation(sender, chunkName, parent.getNodeID(),
-                    parent.getControllerNodeSocket());
+                    parent.getControllerNodeSocket(), requester);
         }
     }
 
@@ -111,11 +112,15 @@ public class RetrieveChunk {
         return currentIntegrityData;
     }
 
-    public void askForCleanChunk(NodeInformation message, String nodeID) throws IOException {
+    public synchronized void askForCleanChunk(NodeInformation message, String nodeID) throws IOException {
         handleCorruption.requestChunkFromServer(message, nodeID, corruptedChunkName, corruptedSlice);
     }
 
-    public void writeSlices(CleanSlices message) throws IOException {
+    public synchronized void writeSlices(CleanSlices message) throws IOException {
         handleCorruption.writeCleanSlices(message);
+        ReadFileInquiry inquiry = new ReadFileInquiry();
+        inquiry.setFilename(message.getChunkName());
+        inquiry.setClientAddress(message.getOriginalClientID());
+        retrieveChunk(inquiry, parent);
     }
 }

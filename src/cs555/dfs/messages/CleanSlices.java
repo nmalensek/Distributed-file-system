@@ -6,6 +6,7 @@ public class CleanSlices implements Protocol, Event {
 
     private int messageType = CLEAN_SLICES;
     private String chunkName;
+    private String originalClientID;
     private byte[] slicesByteArray;
 
     public CleanSlices getType() {
@@ -17,6 +18,9 @@ public class CleanSlices implements Protocol, Event {
 
     public byte[] getSlicesByteArray() { return slicesByteArray; }
     public void setSlicesByteArray(byte[] slicesByteArray) { this.slicesByteArray = slicesByteArray; }
+
+    public String getOriginalClientID() { return originalClientID; }
+    public void setOriginalClientID(String originalClientID) { this.originalClientID = originalClientID; }
 
     @Override
     public int getMessageType() {
@@ -36,6 +40,11 @@ public class CleanSlices implements Protocol, Event {
         int nameLength = nameBytes.length;
         dataOutputStream.writeInt(nameLength);
         dataOutputStream.write(nameBytes);
+
+        byte[] clientBytes = originalClientID.getBytes();
+        int clientLength = clientBytes.length;
+        dataOutputStream.writeInt(clientLength);
+        dataOutputStream.write(clientBytes);
 
         int chunkBytesLength = slicesByteArray.length;
         dataOutputStream.writeInt(chunkBytesLength);
@@ -63,6 +72,12 @@ public class CleanSlices implements Protocol, Event {
         dataInputStream.readFully(nameBytes);
 
         chunkName = new String(nameBytes);
+
+        int clientLength = dataInputStream.readInt();
+        byte[] clientBytes = new byte[clientLength];
+        dataInputStream.readFully(clientBytes);
+
+        originalClientID = new String(clientBytes);
 
         int chunkLength = dataInputStream.readInt();
         slicesByteArray = new byte[chunkLength];

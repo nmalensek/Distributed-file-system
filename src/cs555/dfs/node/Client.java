@@ -142,7 +142,7 @@ public class Client implements Node {
             case "write":
                 try {
 //                    file = new File(text.split("\\s")[1]);
-
+                    
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
                     writeFileInquiry.setClientAddress(thisNodeID);
