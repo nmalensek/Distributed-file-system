@@ -23,6 +23,8 @@ public class HandleSliceCorruption {
         int maximum = chunkBytes.length;
         int writeSize = sliceSize;
 
+        System.out.println("Overwriting good bytes");
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunkName)) {
@@ -43,7 +45,7 @@ public class HandleSliceCorruption {
                                                   Socket controllerSocket, String clientID) throws IOException {
         RequestChunk requestChunk = new RequestChunk();
         requestChunk.setChunkName(chunkName);
-        requestChunk.setChunkServerAddress(sourceServer + ":" + clientID);
+        requestChunk.setChunkServerAddress(sourceServer + "::" + clientID);
 
         controllerSender.send(controllerSocket, requestChunk.getBytes());
     }
@@ -79,7 +81,8 @@ public class HandleSliceCorruption {
         String chunk = cleanSlices.getChunkName();
         byte[] sliceBytes = cleanSlices.getSlicesByteArray();
 
-        try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunk, true)) {
+//        try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunk, true)) {
+        try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunk)) {
             fileOutputStream.write(sliceBytes);
         }
     }

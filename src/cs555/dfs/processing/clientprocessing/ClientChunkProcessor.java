@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -22,7 +23,6 @@ public class ClientChunkProcessor {
     private LinkedList<byte[]> chunkList;
     private Splitter split = new Splitter();
     private TCPSender chunkSender = new TCPSender();
-    private ArrayList<Socket> chunkDestinations = new ArrayList<>();
 
     public ClientChunkProcessor(LinkedList<byte[]> chunkList) {
         this.chunkList = chunkList;
@@ -76,13 +76,7 @@ public class ClientChunkProcessor {
         chunkSender.send(destinationSocket, chunk.getBytes());
         System.out.println("Sent " + chunk.getFileName() + " to " + destinationNodes[0]);
         client.setChunkNumber(chunkNumber + 1);
-        chunkDestinations.add(destinationSocket);
-    }
-
-    public void disconnectFromDestinations() throws IOException {
         Disconnect dc = new Disconnect();
-        for (Socket socket : chunkDestinations) {
-            chunkSender.send(socket, dc.getBytes());
-        }
+        chunkSender.send(destinationSocket, dc.getBytes());
     }
 }

@@ -6,10 +6,14 @@ import cs555.dfs.messages.RequestChunk;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.util.Splitter;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
+import java.util.Arrays;
 
+import static cs555.dfs.util.Constants.chunkSize;
 import static cs555.dfs.util.Constants.sliceSize;
 import static cs555.dfs.util.Constants.storageDirectory;
 
@@ -33,6 +37,7 @@ public class GetCleanSlice {
     }
 
     public synchronized void retrieveCleanSlice(String clientID) throws IOException {
+        System.out.println("Getting requested slice");
 
         try(RandomAccessFile file = new RandomAccessFile(storageDirectory + chunkName, "r")) {
             file.seek(byteStartIndex);
@@ -45,6 +50,7 @@ public class GetCleanSlice {
     }
 
     private synchronized void sendSlices(byte[] sliceArray, String originalClient) throws IOException {
+        System.out.println("Preparing message for " + requestingServer + " so it can send to " + originalClient);
         CleanSlices cleanSlices = new CleanSlices();
         cleanSlices.setChunkName(chunkName);
         cleanSlices.setSlicesByteArray(sliceArray);
@@ -58,6 +64,23 @@ public class GetCleanSlice {
 
         Disconnect dc = new Disconnect();
         sender.send(requesterConnection, dc.getBytes());
+    }
+
+    public synchronized void retrieveCleanChunk(String clientID) throws IOException {
+
+        byte[] chunkBytes = new byte[chunkSize];
+        int bytesRead;
+        try (FileInputStream fileInputStream = new FileInputStream(storageDirectory + chunkName)) {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+            while ((bytesRead = fileInputStream.read(chunkBytes)) != -1) {
+                byteArrayOutputStream.write(chunkBytes, 0, bytesRead);
+            }
+            chunkBytes = byteArrayOutputStream.toByteArray();
+            byteArrayOutputStream.reset();
+        }
+
+        sendSlices(chunkBytes, clientID);
     }
 
 }

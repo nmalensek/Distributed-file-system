@@ -12,6 +12,7 @@ import cs555.dfs.util.Splitter;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static cs555.dfs.util.Constants.*;
 
@@ -36,6 +37,7 @@ public class RetrieveChunk {
         retrievedChunk.setReplicationNodes("N/A");
 
         byte[] chunkArray = new byte[chunkSize];
+        byte[] corruptedBytes = new byte[chunkSize];
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -51,13 +53,14 @@ public class RetrieveChunk {
                 } else {
                     System.out.println("Corruption detected in slice " + corruptedSlice +
                             " of chunk " + corruptedChunkName + ", initiating recovery.");
+                    corruptedBytes = Arrays.copyOf(chunkArray, chunkSize);
                 }
                 byteArrayOutputStream.reset();
             }
         }
         if (corrupted) {
             corrupted = false;
-            handleCorruption.overWriteGoodSlices(byteArrayOutputStream.toByteArray(), corruptedSlice, chunkName);
+            handleCorruption.overWriteGoodSlices(corruptedBytes, corruptedSlice, chunkName);
             handleCorruption.requestChunkLocation(sender, chunkName, parent.getNodeID(),
                     parent.getControllerNodeSocket(), requester);
         }

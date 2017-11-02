@@ -24,8 +24,8 @@ public class ProcessChunkLocations {
     public void sendChunkLocations(RequestChunk message, TCPSender controllerSender) throws IOException {
         String chunkName = message.getChunkName();
         String fileName = chunkName.substring(0, chunkName.lastIndexOf('_'));
-        String returnAddress = message.getChunkServerAddress().split(":")[0];
-        String originalClient = message.getChunkServerAddress().split(":")[1];
+        String returnAddress = message.getChunkServerAddress().split("::")[0];
+        String originalClient = message.getChunkServerAddress().split("::")[1];
         System.out.println("Getting chunk " + chunkName);
 
         List<String> locations = chunkMap.get(fileName).get(chunkName);

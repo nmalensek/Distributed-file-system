@@ -115,6 +115,7 @@ public class TCPReceiverThread extends Thread implements Protocol {
                 break;
             case DISCONNECT:
                 System.out.println("Closing socket...");
+                communicationSocket.setSoLinger(true, 0);
                     communicationSocket.close();
                 break;
             default:
