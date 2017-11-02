@@ -1,5 +1,6 @@
 package cs555.dfs.processing.controllerprocessing;
 
+import cs555.dfs.heartbeat.ControllerHeartbeatThread;
 import cs555.dfs.messages.MajorHeartbeatMessage;
 import cs555.dfs.messages.MinorHeartbeatMessage;
 import cs555.dfs.messages.NodeInformation;
@@ -28,14 +29,18 @@ public class ProcessHeartbeats {
         String newNodeHost = split.getHost(information.getNodeInfo());
         int newNodePort = split.getPort(information.getNodeInfo());
 
+        Socket chunkServerSocket = new Socket(newNodeHost, newNodePort);
+
         NodeRecord newNode = new NodeRecord(
                 information.getNodeInfo(),
-                new Socket(newNodeHost, newNodePort),
+                chunkServerSocket,
                 information.getUsableSpace());
 
         nodeMap.put(information.getNodeInfo(), newNode);
 
-        sendTestResponse(newNode.getNodeSocket());
+        ControllerHeartbeatThread heartbeatThread =
+                new ControllerHeartbeatThread(chunkServerSocket, information.getNodeInfo());
+        heartbeatThread.start();
     }
 
     public synchronized void processMinorHeartbeat(ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,

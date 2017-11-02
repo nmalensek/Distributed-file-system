@@ -16,6 +16,8 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
+import static cs555.dfs.util.Constants.retrievalDirectory;
+
 public class Client implements Node {
 
     private static int controllerPort;
@@ -115,7 +117,9 @@ public class Client implements Node {
     }
 
     private void mergeChunks() throws IOException {
-        FileOutputStream fileOutputStream = new FileOutputStream(filenameToRead);
+        File dir = new File(retrievalDirectory);
+        dir.mkdirs();
+        FileOutputStream fileOutputStream = new FileOutputStream(retrievalDirectory + filenameToRead);
         for (String chunkName : receivedChunks.keySet()) {
             fileOutputStream.write(receivedChunks.get(chunkName));
         }

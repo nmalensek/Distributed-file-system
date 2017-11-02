@@ -4,14 +4,11 @@ import cs555.dfs.messages.MajorHeartbeatMessage;
 import cs555.dfs.messages.MinorHeartbeatMessage;
 import cs555.dfs.node.ChunkServer;
 import cs555.dfs.transport.TCPSender;
-import cs555.dfs.util.ChunkMetadata;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static cs555.dfs.util.Constants.heartbeatInterval;
+import static cs555.dfs.util.Constants.minorHeartbeatInterval;
 import static cs555.dfs.util.Constants.majorHeartbeatInterval;
 
 public class ChunkServerHeartbeatThread extends Thread {
@@ -78,8 +75,8 @@ public class ChunkServerHeartbeatThread extends Thread {
     public void run() {
         while (true) {
             try {
-                Thread.sleep(heartbeatInterval);
-                heartbeatCount += heartbeatInterval;
+                Thread.sleep(minorHeartbeatInterval);
+                heartbeatCount += minorHeartbeatInterval;
                 if (heartbeatCount == majorHeartbeatInterval) {
                     System.out.println("Sending major heartbeat...");
                     sendMajorHeartbeat();

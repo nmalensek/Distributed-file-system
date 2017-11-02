@@ -48,6 +48,8 @@ public class ProcessChunk {
     }
 
     private void writeMetadata(String metadata) throws IOException {
+        File metadataFolder = new File(storageDirectory);
+        metadataFolder.mkdirs();
         try(FileWriter metadataWriter = new FileWriter(metadataFilepath)) {
             metadataWriter.write(metadata + "\n");
         }
