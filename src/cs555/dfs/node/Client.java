@@ -144,8 +144,8 @@ public class Client implements Node {
             case "write":
                 try {
 //                    file = new File(text.split("\\s")[1]);
-//                    file = new File("/s/bach/m/under/nmalensk/555/hw4/animals_of_the_past.txt");
-                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
+                    file = new File("/s/bach/m/under/nmalensk/555/hw4/animals_of_the_past.txt");
+//                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
                     writeFileInquiry.setClientAddress(thisNodeID);

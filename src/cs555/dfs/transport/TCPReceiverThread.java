@@ -113,6 +113,8 @@ public class TCPReceiverThread extends Thread implements Protocol {
                         eventFactory.cleanSlicesEvent(marshalledBytes);
                 node.onEvent(cleanSlicesEvent, communicationSocket);
                 break;
+            case PING:
+                break;
             case DISCONNECT:
                 System.out.println("Closing socket...");
                 communicationSocket.setSoLinger(true, 0);

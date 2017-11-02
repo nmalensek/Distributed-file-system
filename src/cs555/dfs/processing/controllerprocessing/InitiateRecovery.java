@@ -9,6 +9,7 @@ import cs555.dfs.util.DetermineTopThree;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,9 +38,10 @@ public class InitiateRecovery {
         ConcurrentHashMap<String, List<String>> chunkMap = nodeChunksMap.get(fileName);
         List<String> locationList = chunkMap.get(chunkName);
         nodesWithChunks = new ArrayList<>();
-        for (String nodeAddress : locationList) {
+        for (Iterator<String> iterator = locationList.iterator(); iterator.hasNext();) {
+            String nodeAddress = iterator.next();
             if (nodeAddress.equals(nodeID)) {
-                locationList.remove(nodeAddress);
+                iterator.remove();
             } else {
                 nodesWithChunks.add(nodeAddress);
             }

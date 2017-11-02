@@ -83,7 +83,7 @@ public class ProcessChunk {
      * @param chunk Chunk message that originated from client.
      */
     private synchronized void forwardToNextNode(Chunk chunk) throws IOException {
-        if (!chunk.getReplicationNodes().isEmpty()) {
+        if (!chunk.getReplicationNodes().isEmpty() && !chunk.getReplicationNodes().equals("N/A")) {
             String[] nodeArray = chunk.getReplicationNodes().split(",");
             String nextNode = nodeArray[0];
 
