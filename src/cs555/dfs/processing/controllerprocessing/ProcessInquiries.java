@@ -6,6 +6,7 @@ import cs555.dfs.messages.ReadFileInquiry;
 import cs555.dfs.messages.WriteFileInquiry;
 import cs555.dfs.node.NodeRecord;
 import cs555.dfs.transport.TCPSender;
+import cs555.dfs.util.DetermineTopThree;
 import cs555.dfs.util.Splitter;
 
 import java.io.IOException;
@@ -16,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProcessInquiries {
 
     private TCPSender sender = new TCPSender();
-    private Splitter splitter = new Splitter();
     private ConcurrentHashMap<String, Socket> clientAddressMap = new ConcurrentHashMap<>(); //<clientID, clientSocket>
 
     public void processWriteFileInquiry(ConcurrentHashMap<String, NodeRecord> nodeMap, WriteFileInquiry writeInquiry) throws IOException {
@@ -24,7 +24,7 @@ public class ProcessInquiries {
         checkIfKnownClient(clientAddress);
 
         NodeInformation destinationNodes = new NodeInformation();
-        destinationNodes.setNodeInfo(determineTopThreeChunkServers(nodeMap));
+        destinationNodes.setNodeInfo(DetermineTopThree.determineTopThreeChunkServers(nodeMap));
         destinationNodes.setInformationType(Protocol.CHUNK_DESTINATION);
 
         sender.send(clientAddressMap.get(clientAddress), destinationNodes.getBytes());
@@ -43,44 +43,6 @@ public class ProcessInquiries {
         chunkLocations.setInformationType(Protocol.CHUNK_LOCATION);
 
         sender.send(clientAddressMap.get(clientAddress), chunkLocations.getBytes());
-    }
-
-    private String determineTopThreeChunkServers(ConcurrentHashMap<String, NodeRecord> nodes) {
-        String first = "";
-        String second = "";
-        String third = "";
-
-        long firstSpace = 0;
-        long secondSpace = 0;
-        long thirdSpace = 0;
-
-        for (NodeRecord node : nodes.values()) {
-            if (node.getUsableSpace() > firstSpace) {
-
-                third = second;
-                thirdSpace = secondSpace;
-
-                second = first;
-                secondSpace = firstSpace;
-
-                first = node.toString();
-                firstSpace = node.getUsableSpace();
-
-            } else if (node.getUsableSpace() > secondSpace && node.getUsableSpace() < firstSpace) {
-
-                third = second;
-                thirdSpace = secondSpace;
-
-                second = node.toString();
-                secondSpace = node.getUsableSpace();
-
-            } else if (node.getUsableSpace() > thirdSpace && node.getUsableSpace() < secondSpace) {
-
-                third = node.toString();
-                thirdSpace = node.getUsableSpace();
-            }
-        }
-        return first + "," + second + "," + third;
     }
 
     private String findChunkLocations(ConcurrentHashMap<String, List<String>> chunkLocations) {
@@ -104,7 +66,7 @@ public class ProcessInquiries {
 
     private void checkIfKnownClient(String clientAddress) throws IOException {
         if (clientAddressMap.get(clientAddress) == null) {
-            Socket clientSocket = new Socket(splitter.getHost(clientAddress), splitter.getPort(clientAddress));
+            Socket clientSocket = new Socket(Splitter.getHost(clientAddress), Splitter.getPort(clientAddress));
             clientAddressMap.put(clientAddress, clientSocket);
         }
     }

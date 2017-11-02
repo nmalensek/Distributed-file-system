@@ -25,7 +25,9 @@ public class ProcessHeartbeats {
 
     }
 
-    public synchronized void logNewEntry(ConcurrentHashMap<String, NodeRecord> nodeMap, NodeInformation information) throws IOException {
+    public synchronized void logNewEntry(ConcurrentHashMap<String, NodeRecord> nodeMap,
+                                         ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
+                                         NodeInformation information) throws IOException {
         String newNodeHost = split.getHost(information.getNodeInfo());
         int newNodePort = split.getPort(information.getNodeInfo());
 
@@ -39,7 +41,7 @@ public class ProcessHeartbeats {
         nodeMap.put(information.getNodeInfo(), newNode);
 
         ControllerHeartbeatThread heartbeatThread =
-                new ControllerHeartbeatThread(chunkServerSocket, information.getNodeInfo());
+                new ControllerHeartbeatThread(chunkServerSocket, information.getNodeInfo(), nodeMap, nodeChunksMap);
         heartbeatThread.start();
     }
 

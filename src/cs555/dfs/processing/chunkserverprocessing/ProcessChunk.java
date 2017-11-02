@@ -36,14 +36,10 @@ public class ProcessChunk {
         owner.getNewChunksResponsibleFor().add(data.toString());
         writeMetadata(data.toString());
 
-        FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + fullFileName);
-
-        try {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + fullFileName)) {
             fileOutputStream.write(chunkInformation.getChunkByteArray());
             writeHashForSlices(chunkInformation);
             forwardToNextNode(chunkInformation);
-        } finally {
-            fileOutputStream.close();
         }
     }
 

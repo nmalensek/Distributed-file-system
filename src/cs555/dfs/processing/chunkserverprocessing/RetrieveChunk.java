@@ -19,7 +19,6 @@ import static cs555.dfs.util.Constants.*;
 public class RetrieveChunk {
 
     private TCPSender sender = new TCPSender();
-    private Splitter splitter = new Splitter();
     private ChunkServer parent;
     private int corruptedSlice;
     private String corruptedChunkName;
@@ -30,7 +29,7 @@ public class RetrieveChunk {
         this.parent = parent;
         String chunkName = chunkRequest.getFilename();
         String requester = chunkRequest.getClientAddress();
-        Socket clientSocket = new Socket(splitter.getHost(requester), splitter.getPort(requester));
+        Socket clientSocket = new Socket(Splitter.getHost(requester), Splitter.getPort(requester));
 
         Chunk retrievedChunk = new Chunk();
         retrievedChunk.setFileName(chunkName);

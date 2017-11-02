@@ -25,7 +25,6 @@ public class Client implements Node {
     private int thisNodePort;
     private static String thisNodeHost;
     private String thisNodeID;
-    private Splitter split = new Splitter();
     private TCPServerThread clientServer;
     private TCPSender clientSender = new TCPSender();
     private Socket controllerNodeSocket = new Socket(controllerHost, controllerPort);
@@ -111,7 +110,7 @@ public class Client implements Node {
             requestChunk.setClientAddress(thisNodeID);
             requestChunk.setFilename(chunkName);
 
-            Socket chunkServerSocket = new Socket(split.getHost(hostPort), split.getPort(hostPort));
+            Socket chunkServerSocket = new Socket(Splitter.getHost(hostPort), Splitter.getPort(hostPort));
             clientSender.send(chunkServerSocket, requestChunk.getBytes());
         }
     }

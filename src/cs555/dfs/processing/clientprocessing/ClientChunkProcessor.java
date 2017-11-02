@@ -12,8 +12,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import static cs555.dfs.util.Constants.chunkSize;
@@ -21,7 +19,6 @@ import static cs555.dfs.util.Constants.chunkSize;
 public class ClientChunkProcessor {
 
     private LinkedList<byte[]> chunkList;
-    private Splitter split = new Splitter();
     private TCPSender chunkSender = new TCPSender();
 
     public ClientChunkProcessor(LinkedList<byte[]> chunkList) {
@@ -37,22 +34,18 @@ public class ClientChunkProcessor {
      */
     public void chunkFile(File fileToChunk) throws IOException {
 
-        FileInputStream fileInputStream = new FileInputStream(fileToChunk);
-
         byte[] chunk = new byte[chunkSize];
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         int read;
-        try {
+        try (FileInputStream fileInputStream = new FileInputStream(fileToChunk)) {
             while ((read = fileInputStream.read(chunk)) != -1) {
                 byteArrayOutputStream.write(chunk, 0, read);
                 chunkList.add(byteArrayOutputStream.toByteArray());
                 byteArrayOutputStream.reset();
             }
             System.out.println(chunkList.size());
-        } finally {
-            fileInputStream.close();
         }
     }
 
@@ -72,7 +65,7 @@ public class ClientChunkProcessor {
         chunk.setFileName(filename + "_chunk" + chunkNumber);
         chunk.setChunkByteArray(chunkList.remove());
 
-        Socket destinationSocket = new Socket(split.getHost(destinationNodes[0]), split.getPort(destinationNodes[0]));
+        Socket destinationSocket = new Socket(Splitter.getHost(destinationNodes[0]), Splitter.getPort(destinationNodes[0]));
         chunkSender.send(destinationSocket, chunk.getBytes());
         System.out.println("Sent " + chunk.getFileName() + " to " + destinationNodes[0]);
         client.setChunkNumber(chunkNumber + 1);

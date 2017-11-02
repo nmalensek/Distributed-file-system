@@ -35,7 +35,7 @@ public class ControllerNode implements Node {
     public void onEvent(Event event, Socket destinationSocket) throws IOException {
         if (event instanceof NodeInformation) {
             System.out.println("got a node information");
-            processHeartbeats.logNewEntry(nodesInOverlay, (NodeInformation) event);
+            processHeartbeats.logNewEntry(nodesInOverlay, chunkStorageMap, (NodeInformation) event);
         } else if (event instanceof MinorHeartbeatMessage) {
                 processHeartbeats.processMinorHeartbeat(chunkStorageMap, nodesInOverlay, (MinorHeartbeatMessage) event);
             System.out.println("got a minor heartbeat at " + System.currentTimeMillis());

@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 public class StringTest {
@@ -73,12 +75,27 @@ public class StringTest {
         System.out.println(test.toString());
     }
 
+    private void listTest() {
+        List<String> testList = new ArrayList<>();
+        testList.add("test1:1234");
+        testList.add("test2:1235534");
+        testList.add("test3:12554");
+
+        for (String address : testList) {
+            if (address.equals("test2:1235534")) {
+                testList.remove(address);
+            }
+        }
+        System.out.println(testList.toString());
+    }
+
     public static void main(String[] args) throws IOException {
         StringTest stringTest = new StringTest();
 //        stringTest.test();
 //        stringTest.sliceTest("abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890");
 //        stringTest.sliceTest("abcdefghijklmnopqrstuvxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890");
 //        stringTest.splitTest();
-        stringTest.treeMapTest();
+//        stringTest.treeMapTest();
+        stringTest.listTest();
     }
 }
