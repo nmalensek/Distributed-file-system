@@ -65,11 +65,15 @@ public class ClientChunkProcessor {
         chunk.setFileName(filename + "_chunk" + chunkNumber);
         chunk.setChunkByteArray(chunkList.remove());
 
-        Socket destinationSocket = new Socket(Splitter.getHost(destinationNodes[0]), Splitter.getPort(destinationNodes[0]));
-        chunkSender.send(destinationSocket, chunk.getBytes());
-        System.out.println("Sent " + chunk.getFileName() + " to " + destinationNodes[0]);
-        client.setChunkNumber(chunkNumber + 1);
-        Disconnect dc = new Disconnect();
-        chunkSender.send(destinationSocket, dc.getBytes());
+        try {
+            Socket destinationSocket = new Socket(Splitter.getHost(destinationNodes[0]), Splitter.getPort(destinationNodes[0]));
+            chunkSender.send(destinationSocket, chunk.getBytes());
+            System.out.println("Sent " + chunk.getFileName() + " to " + destinationNodes[0]);
+            client.setChunkNumber(chunkNumber + 1);
+            Disconnect dc = new Disconnect();
+            chunkSender.send(destinationSocket, dc.getBytes());
+        } catch (IOException ioe) {
+            System.out.println("Write to " + destinationNodes[0] + " failed, please retry.");
+        }
     }
 }

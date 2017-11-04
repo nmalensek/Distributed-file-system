@@ -66,7 +66,7 @@ public class InitiateRecovery {
             recoverySender.send(chunkHolderSocket, recoverChunk.getBytes());
             System.out.println("Requesting " + holderAddress + " to send chunk replica to " + replicationAddress);
         } catch (IOException e) {
-            System.out.println("Could not contact selected node, retrying...");
+            System.out.println("Could not contact selected node, retrying with new node...");
             nodesWithChunks.remove(0);
             replicateFile(destinations, chunkName);
         }

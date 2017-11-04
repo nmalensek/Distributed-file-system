@@ -42,6 +42,7 @@ public class ConnectionTest implements Node {
         try {
             System.out.println("Trying to reconnect...");
             testSocket = new Socket("127.0.0.1", 50000);
+//            test();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {

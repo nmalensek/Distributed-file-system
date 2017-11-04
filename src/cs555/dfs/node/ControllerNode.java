@@ -6,6 +6,7 @@ import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.processing.controllerprocessing.ProcessHeartbeats;
 import cs555.dfs.processing.controllerprocessing.ProcessInquiries;
+import cs555.dfs.util.TextInputThread;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -29,6 +30,8 @@ public class ControllerNode implements Node {
     private void startup() {
         TCPServerThread serverThread = new TCPServerThread(this, controllerPort);
         serverThread.start();
+        TextInputThread textInputThread = new TextInputThread(this);
+        textInputThread.start();
     }
 
     @Override
@@ -54,6 +57,20 @@ public class ControllerNode implements Node {
         }
     }
 
+    @Override
+    public void processText(String text) throws IOException {
+        switch (text) {
+            case "info":
+                System.out.println(nodesInOverlay.keySet());
+                for (String fileName : chunkStorageMap.keySet()) {
+                    for (String chunkName : chunkStorageMap.get(fileName).keySet()) {
+                        System.out.println(chunkName + " -- " + chunkStorageMap.get(fileName).get(chunkName).toString());
+                    }
+                }
+                break;
+        }
+    }
+
     public static void main(String[] args) throws UnknownHostException {
         try {
             controllerHost = Inet4Address.getLocalHost().getHostName();
@@ -67,7 +84,4 @@ public class ControllerNode implements Node {
         }
 
     }
-
-    @Override
-    public void processText(String text) throws IOException { }
 }

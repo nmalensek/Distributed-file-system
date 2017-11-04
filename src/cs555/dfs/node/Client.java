@@ -35,6 +35,7 @@ public class Client implements Node {
     private final TreeMap<String, byte[]> receivedChunks = new TreeMap<>();
     private int totalChunks;
     private int chunkNumber = 1;
+    private boolean controllerDown = false;
 
     public Client() throws IOException {
 
@@ -85,10 +86,10 @@ public class Client implements Node {
     private void sendChunk(NodeInformation information) throws IOException {
         chunkProcessor.sendChunk(information, chunkNumber, file.getName(), this);
         if (!chunkList.isEmpty()) {
-            System.out.println("Asking for destinations for chunk " + chunkNumber);
-            WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
-            writeFileInquiry.setClientAddress(thisNodeID);
-            clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
+                System.out.println("Asking for destinations for chunk " + chunkNumber);
+                WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
+                writeFileInquiry.setClientAddress(thisNodeID);
+                clientSender.send(controllerNodeSocket, writeFileInquiry.getBytes());
         } else {
             System.out.println("Done sending chunks");
             chunkNumber = 1; //sent all the file's chunks, reset chunk counter
@@ -125,11 +126,12 @@ public class Client implements Node {
     }
 
     @Override
-    public void processText(String text) throws IOException {
+    public void processText(String text) {
         String command = text.split("\\s")[0];
         switch (command) {
             case "read":
                 try {
+                    if (controllerDown) { reconnectToController(); }
 //                    filenameToRead = text.split("\\s")[1];
                     filenameToRead = "animals_of_the_past_merged.txt";
                     ReadFileInquiry readFileInquiry = new ReadFileInquiry();
@@ -139,13 +141,16 @@ public class Client implements Node {
                     clientSender.send(controllerNodeSocket, readFileInquiry.getBytes());
                 } catch (StringIndexOutOfBoundsException e) {
                     System.out.println("Usage: read [file name]");
+                } catch (IOException ioe) {
+                    handleControllerFailure("read");
                 }
                 break;
             case "write":
                 try {
+                    if (controllerDown) { reconnectToController(); }
 //                    file = new File(text.split("\\s")[1]);
-                    file = new File("/s/bach/m/under/nmalensk/555/hw4/animals_of_the_past.txt");
-//                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
+//                    file = new File("/s/bach/m/under/nmalensk/555/hw4/animals_of_the_past.txt");
+                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
                     writeFileInquiry.setClientAddress(thisNodeID);
@@ -153,8 +158,31 @@ public class Client implements Node {
                     System.out.println("Asking for destination for chunk " + chunkNumber);
                 } catch (StringIndexOutOfBoundsException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
                     System.out.println("Usage: write [filePath]");
+                } catch (IOException ioe) {
+                    handleControllerFailure("write");
                 }
                 break;
+        }
+    }
+
+    private void handleControllerFailure(String action) {
+        System.out.println("Couldn't contact Controller, " + action + " aborted");
+        chunkList.clear();
+        try {
+            controllerNodeSocket.close();
+            controllerDown = true;
+        } catch (IOException ignored) {
+        }
+    }
+
+    private void reconnectToController() {
+        if (controllerNodeSocket.isClosed()) {
+            try {
+                controllerNodeSocket = new Socket(controllerHost, controllerPort);
+                controllerDown = false;
+            } catch (IOException e) {
+                System.out.println("Controller is still down on reconnect attempt.");
+            }
         }
     }
 

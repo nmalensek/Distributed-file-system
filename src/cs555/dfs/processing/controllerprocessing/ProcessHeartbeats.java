@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ProcessHeartbeats {
 
-    private Splitter split = new Splitter();
     private TCPSender sender = new TCPSender();
 
     public ProcessHeartbeats() {
@@ -28,8 +27,8 @@ public class ProcessHeartbeats {
     public synchronized void logNewEntry(ConcurrentHashMap<String, NodeRecord> nodeMap,
                                          ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
                                          NodeInformation information) throws IOException {
-        String newNodeHost = split.getHost(information.getNodeInfo());
-        int newNodePort = split.getPort(information.getNodeInfo());
+        String newNodeHost = Splitter.getHost(information.getNodeInfo());
+        int newNodePort = Splitter.getPort(information.getNodeInfo());
 
         Socket chunkServerSocket = new Socket(newNodeHost, newNodePort);
 
@@ -120,7 +119,7 @@ public class ProcessHeartbeats {
     }
 
     private synchronized NodeRecord registerNodeData(String nodeID, long freeSpace) throws IOException {
-        Socket nodeSocket = new Socket(split.getHost(nodeID), split.getPort(nodeID));
+        Socket nodeSocket = new Socket(Splitter.getHost(nodeID), Splitter.getPort(nodeID));
 
         return new NodeRecord(nodeID, nodeSocket, freeSpace);
     }
@@ -130,9 +129,9 @@ public class ProcessHeartbeats {
         nodeToUpdate.setNumChunks(numChunks);
     }
 
-    private void sendTestResponse(Socket socket) throws IOException {
-        NodeInformation nodeInformation = new NodeInformation();
-        nodeInformation.setNodeInfo("test");
-        sender.send(socket, nodeInformation.getBytes());
-    }
+//    private void sendTestResponse(Socket socket) throws IOException {
+//        NodeInformation nodeInformation = new NodeInformation();
+//        nodeInformation.setNodeInfo("test");
+//        sender.send(socket, nodeInformation.getBytes());
+//    }
 }

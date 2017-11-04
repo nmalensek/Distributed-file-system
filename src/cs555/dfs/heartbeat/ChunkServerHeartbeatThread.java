@@ -71,11 +71,22 @@ public class ChunkServerHeartbeatThread extends Thread {
         return allChunksBuilder.toString();
     }
 
+    private void tryToReconnect() {
+        try {
+            controllerSocket = new Socket(owner.getControllerHost(), owner.getControllerPort());
+        } catch (IOException e) {
+            System.out.println("Reconnect failed, Controller Node's not back up. Retrying...");
+        }
+    }
+
     @Override
     public void run() {
         while (true) {
             try {
                 Thread.sleep(minorHeartbeatInterval);
+                if (controllerSocket.isClosed()) {
+                    tryToReconnect();
+                }
                 heartbeatCount += minorHeartbeatInterval;
                 if (heartbeatCount == majorHeartbeatInterval) {
                     System.out.println("Sending major heartbeat...");
@@ -85,8 +96,15 @@ public class ChunkServerHeartbeatThread extends Thread {
                     System.out.println("Sending minor heartbeat...");
                     sendMinorHeartbeat();
                 }
-            } catch (InterruptedException | IOException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (IOException e) {
+                System.out.println("Could not contact Controller Node. Trying to reconnect on next heartbeat...");
+                try {
+                    controllerSocket.close();
+                } catch (IOException ignored) {
+
+                }
             }
         }
     }

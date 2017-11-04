@@ -43,11 +43,12 @@ public class ProcessChunk {
         }
     }
 
-    private void writeMetadata(String metadata) throws IOException {
+    private synchronized void writeMetadata(String metadata) throws IOException {
         File metadataFolder = new File(storageDirectory);
         metadataFolder.mkdirs();
-        try(FileWriter metadataWriter = new FileWriter(metadataFilepath)) {
+        try(FileWriter metadataWriter = new FileWriter(metadataFilepath, true)) {
             metadataWriter.write(metadata + "\n");
+            metadataWriter.flush();
         }
     }
 

@@ -146,6 +146,10 @@ public class ChunkServer implements Node {
 
     public Socket getControllerNodeSocket() { return controllerNodeSocket; }
 
+    public static int getControllerPort() { return controllerPort; }
+
+    public static String getControllerHost() { return controllerHost; }
+
     public static void main(String[] args) {
         try {
             controllerHost = args[0];
