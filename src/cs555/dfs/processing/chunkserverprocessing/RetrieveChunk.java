@@ -53,6 +53,7 @@ public class RetrieveChunk {
                     System.out.println("Corruption detected in slice " + corruptedSlice +
                             " of chunk " + corruptedChunkName + ", initiating recovery.");
                     corruptedBytes = Arrays.copyOf(chunkArray, chunkSize);
+                    break;
                 }
                 byteArrayOutputStream.reset();
             }

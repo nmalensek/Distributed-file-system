@@ -57,7 +57,7 @@ public class ControllerHeartbeatThread extends Thread {
             try {
                     Thread.sleep(minorHeartbeatInterval);
                     sendServerHeartbeat();
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
                 sendServerHeartbeat();
             }
         }

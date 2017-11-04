@@ -151,6 +151,8 @@ public class Client implements Node {
                     clientSender.send(controllerNodeSocket, readFileInquiry.getBytes());
                 } catch (StringIndexOutOfBoundsException e) {
                     System.out.println("Usage: read [file name]");
+                } catch (FileNotFoundException fnfe) {
+                    System.out.println("Could not find specified file, please re-enter.");
                 } catch (IOException ioe) {
                     handleControllerFailure("read");
                 }
@@ -168,6 +170,8 @@ public class Client implements Node {
                     System.out.println("Asking for destination for chunk " + chunkNumber);
                 } catch (StringIndexOutOfBoundsException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
                     System.out.println("Usage: write [filePath]");
+                } catch (FileNotFoundException fnfe) {
+                    System.out.println("Could not find specified file, please re-enter.");
                 } catch (IOException ioe) {
                     handleControllerFailure("write");
                 }
