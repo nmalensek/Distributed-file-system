@@ -46,6 +46,7 @@ public class ProcessChunk {
     private synchronized void writeMetadata(String metadata) throws IOException {
         File metadataFolder = new File(storageDirectory);
         metadataFolder.mkdirs();
+//        metadataFolder.deleteOnExit();
         try(FileWriter metadataWriter = new FileWriter(metadataFilepath, true)) {
             metadataWriter.write(metadata + "\n");
             metadataWriter.flush();

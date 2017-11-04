@@ -31,15 +31,13 @@ public class Client implements Node {
     private File file;
     private String filenameToRead;
     private LinkedList<byte[]> chunkList = new LinkedList<>();
-    private ClientChunkProcessor chunkProcessor = new ClientChunkProcessor(chunkList);
+    private ClientChunkProcessor chunkProcessor = new ClientChunkProcessor(chunkList, controllerNodeSocket);
     private final TreeMap<String, byte[]> receivedChunks = new TreeMap<>();
     private int totalChunks;
     private int chunkNumber = 1;
     private boolean controllerDown = false;
 
-    public Client() throws IOException {
-
-    }
+    public Client() throws IOException { }
 
     private void startup() {
         clientServer = new TCPServerThread(this, 0);
@@ -111,8 +109,20 @@ public class Client implements Node {
             requestChunk.setClientAddress(thisNodeID);
             requestChunk.setFilename(chunkName);
 
-            Socket chunkServerSocket = new Socket(Splitter.getHost(hostPort), Splitter.getPort(hostPort));
-            clientSender.send(chunkServerSocket, requestChunk.getBytes());
+            try {
+                Socket chunkServerSocket = new Socket(Splitter.getHost(hostPort), Splitter.getPort(hostPort));
+                clientSender.send(chunkServerSocket, requestChunk.getBytes());
+            } catch (IOException e) {
+                ChunkServerDown chunkServerDown = new ChunkServerDown();
+                chunkServerDown.setNodeInfo(hostPort);
+                clientSender.send(controllerNodeSocket, chunkServerDown.getBytes());
+                System.out.println("Unable to request chunks from " + hostPort + ", controller has been notified.");
+                System.out.println("Request aborted, please re-submit.");
+                synchronized (receivedChunks) {
+                    receivedChunks.clear();
+                }
+                break;
+            }
         }
     }
 
@@ -149,8 +159,8 @@ public class Client implements Node {
                 try {
                     if (controllerDown) { reconnectToController(); }
 //                    file = new File(text.split("\\s")[1]);
-//                    file = new File("/s/bach/m/under/nmalensk/555/hw4/animals_of_the_past.txt");
-                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
+                    file = new File("/s/bach/m/under/nmalensk/555/hw4/animals_of_the_past.txt");
+//                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
                     writeFileInquiry.setClientAddress(thisNodeID);

@@ -20,6 +20,7 @@ public class ControllerHeartbeatThread extends Thread {
     private String nodeID;
     private ConcurrentHashMap<String, NodeRecord> nodeMap;
     private ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap;
+    private boolean running = true;
 
     public ControllerHeartbeatThread(Socket targetSocket, String nodeID, ConcurrentHashMap<String, NodeRecord> nodeMap,
                                      ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap) {
@@ -29,29 +30,36 @@ public class ControllerHeartbeatThread extends Thread {
         this.nodeChunksMap = nodeChunksMap;
     }
 
-    public void sendServerHeartbeat() throws IOException {
+    public synchronized void sendServerHeartbeat() {
         Ping ping = new Ping();
-        heartbeatSender.send(targetSocket, ping.getBytes());
+        try {
+            heartbeatSender.send(targetSocket, ping.getBytes());
+        } catch (IOException e) {
+            handleIOException();
+            running = false;
+        }
     }
 
-    private void startReReplication() {
+    private synchronized void handleIOException() {
+        if (running) {
+            System.out.println("Could not contact chunk server at " + targetSocket.getRemoteSocketAddress()
+                    + ", starting recovery.");
+            startReReplication();
+        }
+    }
+
+    private synchronized void startReReplication() {
         InitiateRecovery initiateRecovery = new InitiateRecovery();
         initiateRecovery.removeChunkServer(nodeMap, nodeChunksMap, nodeID);
     }
 
     @Override
     public void run() {
-        while (true) {
+        while (running) {
             try {
-                Thread.sleep(minorHeartbeatInterval);
-                sendServerHeartbeat();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                System.out.println("Could not contact chunk server at " + targetSocket.getRemoteSocketAddress()
-                + ", starting recovery.");
-                startReReplication();
-                break;
+                    Thread.sleep(minorHeartbeatInterval);
+                    sendServerHeartbeat();
+            } catch (InterruptedException ignored) {
             }
         }
     }

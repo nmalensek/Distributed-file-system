@@ -113,12 +113,17 @@ public class TCPReceiverThread extends Thread implements Protocol {
                         eventFactory.cleanSlicesEvent(marshalledBytes);
                 node.onEvent(cleanSlicesEvent, communicationSocket);
                 break;
+            case CHUNK_SERVER_DOWN:
+                Event<ChunkServerDown> chunkServerDownEvent =
+                        eventFactory.chunkServerDownEvent(marshalledBytes);
+                node.onEvent(chunkServerDownEvent, communicationSocket);
+                break;
             case PING:
                 break;
             case DISCONNECT:
                 System.out.println("Closing socket...");
                 communicationSocket.setSoLinger(true, 0);
-                    communicationSocket.close();
+                communicationSocket.close();
                 break;
             default:
                 System.out.println("Something went horribly wrong, please restart.");

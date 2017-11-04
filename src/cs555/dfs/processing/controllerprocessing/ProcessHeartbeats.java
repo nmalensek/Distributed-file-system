@@ -13,16 +13,14 @@ import cs555.dfs.util.Splitter;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ProcessHeartbeats {
 
     private TCPSender sender = new TCPSender();
-
-    public ProcessHeartbeats() {
-
-    }
+    private HashMap<String, ControllerHeartbeatThread> heartbeatThreads = new HashMap<>();
 
     public synchronized void logNewEntry(ConcurrentHashMap<String, NodeRecord> nodeMap,
                                          ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
@@ -42,6 +40,7 @@ public class ProcessHeartbeats {
         ControllerHeartbeatThread heartbeatThread =
                 new ControllerHeartbeatThread(chunkServerSocket, information.getNodeInfo(), nodeMap, nodeChunksMap);
         heartbeatThread.start();
+        heartbeatThreads.put(information.getNodeInfo(), heartbeatThread);
     }
 
     public synchronized void processMinorHeartbeat(ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
@@ -129,7 +128,11 @@ public class ProcessHeartbeats {
         nodeToUpdate.setNumChunks(numChunks);
     }
 
-//    private void sendTestResponse(Socket socket) throws IOException {
+    public HashMap<String, ControllerHeartbeatThread> getHeartbeatThreads() {
+        return heartbeatThreads;
+    }
+
+    //    private void sendTestResponse(Socket socket) throws IOException {
 //        NodeInformation nodeInformation = new NodeInformation();
 //        nodeInformation.setNodeInfo("test");
 //        sender.send(socket, nodeInformation.getBytes());

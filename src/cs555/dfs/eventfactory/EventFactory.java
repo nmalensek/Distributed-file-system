@@ -80,4 +80,10 @@ public final class EventFactory {
         return cleanSlices;
     }
 
+    public static Event<ChunkServerDown> chunkServerDownEvent(byte[] marshalledBytes) throws IOException {
+        ChunkServerDown chunkServerDown = new ChunkServerDown();
+        chunkServerDown.readMessage(marshalledBytes);
+        return chunkServerDown;
+    }
+
 }

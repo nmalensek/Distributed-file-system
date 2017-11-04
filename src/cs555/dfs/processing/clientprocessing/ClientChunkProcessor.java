@@ -1,6 +1,7 @@
 package cs555.dfs.processing.clientprocessing;
 
 import cs555.dfs.messages.Chunk;
+import cs555.dfs.messages.ChunkServerDown;
 import cs555.dfs.messages.Disconnect;
 import cs555.dfs.messages.NodeInformation;
 import cs555.dfs.node.Client;
@@ -20,9 +21,11 @@ public class ClientChunkProcessor {
 
     private LinkedList<byte[]> chunkList;
     private TCPSender chunkSender = new TCPSender();
+    private Socket controllerSocket;
 
-    public ClientChunkProcessor(LinkedList<byte[]> chunkList) {
+    public ClientChunkProcessor(LinkedList<byte[]> chunkList, Socket controllerSocket) {
         this.chunkList = chunkList;
+        this.controllerSocket = controllerSocket;
     }
 
     /**
@@ -73,7 +76,10 @@ public class ClientChunkProcessor {
             Disconnect dc = new Disconnect();
             chunkSender.send(destinationSocket, dc.getBytes());
         } catch (IOException ioe) {
-            System.out.println("Write to " + destinationNodes[0] + " failed, please retry.");
+            ChunkServerDown serverDown = new ChunkServerDown();
+            serverDown.setNodeInfo(destinationNodes[0]);
+            chunkSender.send(controllerSocket, serverDown.getBytes());
+            System.out.println("Write to " + destinationNodes[0] + " failed, Controller Node has been informed.");
         }
     }
 }
