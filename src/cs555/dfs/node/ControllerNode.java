@@ -55,7 +55,7 @@ public class ControllerNode implements Node {
             locations.setUpInformation(chunkStorageMap, nodesInOverlay);
             locations.sendChunkLocations((RequestChunk) event, controllerSender);
         } else if (event instanceof ChunkServerDown) {
-            processHeartbeats.getHeartbeatThreads().get(((ChunkServerDown) event).getNodeInfo()).sendServerHeartbeat();
+            processHeartbeats.getHeartbeatThreads().get(((ChunkServerDown) event).getNodeInfo()).interrupt();
         }
     }
 

@@ -41,11 +41,9 @@ public class ControllerHeartbeatThread extends Thread {
     }
 
     private synchronized void handleIOException() {
-        if (running) {
             System.out.println("Could not contact chunk server at " + targetSocket.getRemoteSocketAddress()
                     + ", starting recovery.");
             startReReplication();
-        }
     }
 
     private synchronized void startReReplication() {
@@ -60,6 +58,7 @@ public class ControllerHeartbeatThread extends Thread {
                     Thread.sleep(minorHeartbeatInterval);
                     sendServerHeartbeat();
             } catch (InterruptedException ignored) {
+                sendServerHeartbeat();
             }
         }
     }
