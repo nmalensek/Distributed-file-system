@@ -29,7 +29,7 @@ public class TCPServerThread extends Thread {
 
             while(true) {
                 new TCPReceiverThread(serverSocket.accept(), node).start();
-                System.out.println("A new client connected");
+//                System.out.println("A new client connected");
                 }
         } catch (IOException e) {
             e.printStackTrace();

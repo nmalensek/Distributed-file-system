@@ -48,7 +48,7 @@ public class RetrieveChunk {
                 if (!corrupted) {
                     retrievedChunk.setChunkByteArray(byteArrayOutputStream.toByteArray());
                 sender.send(clientSocket, retrievedChunk.getBytes());
-                System.out.println("Sent chunk " + chunkName);
+                System.out.println("Sent chunk " + chunkName + " to " + requester);
                 } else {
                     System.out.println("Corruption detected in slice " + corruptedSlice +
                             " of chunk " + corruptedChunkName + ", initiating recovery.");

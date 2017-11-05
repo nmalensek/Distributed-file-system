@@ -5,6 +5,7 @@ import cs555.dfs.node.ControllerNode;
 import cs555.dfs.node.NodeRecord;
 import cs555.dfs.processing.controllerprocessing.InitiateRecovery;
 import cs555.dfs.transport.TCPSender;
+import cs555.dfs.util.Splitter;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -34,6 +35,7 @@ public class ControllerHeartbeatThread extends Thread {
         Ping ping = new Ping();
         try {
             heartbeatSender.send(targetSocket, ping.getBytes());
+//            System.out.println("Heartbeat to " + nodeID + " successful");
         } catch (IOException e) {
             handleIOException();
             running = false;
@@ -58,7 +60,13 @@ public class ControllerHeartbeatThread extends Thread {
                     Thread.sleep(minorHeartbeatInterval);
                     sendServerHeartbeat();
             } catch (InterruptedException e) {
-                sendServerHeartbeat();
+                System.out.println("Interrupted, attempting to send heartbeat.");
+                try {
+                    targetSocket = new Socket(Splitter.getHost(nodeID), Splitter.getPort(nodeID));
+                } catch (IOException ioe) {
+                    handleIOException();
+                    running = false;
+                }
             }
         }
     }

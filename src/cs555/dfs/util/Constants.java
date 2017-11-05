@@ -3,7 +3,7 @@ package cs555.dfs.util;
 public class Constants {
 
     public static final int sliceSize = 8192;
-    public static final int minorHeartbeatInterval = 10000;
+    public static final int minorHeartbeatInterval = 30000;
     public static final int majorHeartbeatInterval = 300000;
     public static final int chunkSize = 65536;
     public static final String integrity = "_integrity";

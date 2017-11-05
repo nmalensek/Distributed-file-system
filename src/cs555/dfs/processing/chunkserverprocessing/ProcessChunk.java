@@ -41,12 +41,17 @@ public class ProcessChunk {
             writeHashForSlices(chunkInformation);
             forwardToNextNode(chunkInformation);
         }
+        System.out.println("Got chunk " + fullFileName);
     }
 
     private synchronized void writeMetadata(String metadata) throws IOException {
         File metadataFolder = new File(storageDirectory);
         metadataFolder.mkdirs();
         metadataFolder.deleteOnExit();
+        File metadataFile = new File(metadataFilepath);
+        metadataFile.createNewFile();
+        metadataFile.deleteOnExit();
+
         try(FileWriter metadataWriter = new FileWriter(metadataFilepath, true)) {
             metadataWriter.write(metadata + "\n");
             metadataWriter.flush();
