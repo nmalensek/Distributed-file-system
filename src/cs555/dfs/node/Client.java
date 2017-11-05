@@ -95,6 +95,10 @@ public class Client implements Node {
     }
 
     private void requestChunks(NodeInformation information) throws IOException {
+        if (information.getNodeInfo().isEmpty()) {
+            System.out.println("Controller could not locate file, please re-enter.");
+            return;
+        }
         String[] numChunksPlusChunks = information.getNodeInfo().split("#!#");
         totalChunks = Integer.parseInt(numChunksPlusChunks[0]);
         System.out.println(totalChunks);
@@ -142,12 +146,12 @@ public class Client implements Node {
             case "read":
                 try {
                     if (controllerDown) { reconnectToController(); }
-//                    filenameToRead = text.split("\\s")[1];
-                    filenameToRead = "animals_of_the_past_merged.txt";
+                    filenameToRead = text.split("\\s")[1] + "_merged";
+//                    filenameToRead = "animals_of_the_past_merged.txt";
                     ReadFileInquiry readFileInquiry = new ReadFileInquiry();
                     readFileInquiry.setClientAddress(thisNodeID);
-//                    readFileInquiry.setFilename(text.split("\\s")[1]);
-                    readFileInquiry.setFilename("animals_of_the_past.txt");
+                    readFileInquiry.setFilename(text.split("\\s")[1]);
+//                    readFileInquiry.setFilename("animals_of_the_past.txt");
                     clientSender.send(controllerNodeSocket, readFileInquiry.getBytes());
                 } catch (StringIndexOutOfBoundsException e) {
                     System.out.println("Usage: read [file name]");
@@ -160,8 +164,8 @@ public class Client implements Node {
             case "write":
                 try {
                     if (controllerDown) { reconnectToController(); }
-//                    file = new File(text.split("\\s")[1]);
-                    file = new File("/s/bach/m/under/nmalensk/555/hw4/animals_of_the_past.txt");
+                    file = new File(text.split("\\s")[1]);
+//                    file = new File("/s/bach/m/under/nmalensk/555/hw4/animals_of_the_past.txt");
 //                    file = new File("/Users/nicholas/Documents/School/CS555/HW4/test/animals_of_the_past.txt");
                     chunkProcessor.chunkFile(file);
                     WriteFileInquiry writeFileInquiry = new WriteFileInquiry();
@@ -184,13 +188,14 @@ public class Client implements Node {
         chunkList.clear();
         try {
             controllerNodeSocket.close();
+            controllerNodeSocket = null;
             controllerDown = true;
         } catch (IOException ignored) {
         }
     }
 
     private void reconnectToController() {
-        if (controllerNodeSocket.isClosed()) {
+        if (controllerNodeSocket == null) {
             try {
                 controllerNodeSocket = new Socket(controllerHost, controllerPort);
                 controllerDown = false;

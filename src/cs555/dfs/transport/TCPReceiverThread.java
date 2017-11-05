@@ -42,7 +42,7 @@ public class TCPReceiverThread extends Thread implements Protocol {
                 determineMessageType(data);
 
             } catch (IOException ioe) {
-                ioe.printStackTrace();
+//                ioe.printStackTrace();
                 communicationSocket = null;
 //                System.out.println("A node left the overlay");
             } catch (ClassNotFoundException e) {
@@ -121,7 +121,7 @@ public class TCPReceiverThread extends Thread implements Protocol {
             case PING:
                 break;
             case DISCONNECT:
-                System.out.println("Closing socket...");
+//                System.out.println("Closing socket...");
                 communicationSocket.setSoLinger(true, 0);
                 communicationSocket.close();
                 break;

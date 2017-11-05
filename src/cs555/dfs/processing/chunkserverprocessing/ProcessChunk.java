@@ -46,7 +46,7 @@ public class ProcessChunk {
     private synchronized void writeMetadata(String metadata) throws IOException {
         File metadataFolder = new File(storageDirectory);
         metadataFolder.mkdirs();
-//        metadataFolder.deleteOnExit();
+        metadataFolder.deleteOnExit();
         try(FileWriter metadataWriter = new FileWriter(metadataFilepath, true)) {
             metadataWriter.write(metadata + "\n");
             metadataWriter.flush();
@@ -97,6 +97,7 @@ public class ProcessChunk {
 
             Socket nextSocket = new Socket(splitter.getHost(nextNode), splitter.getPort(nextNode));
             forwardChunk.send(nextSocket, chunk.getBytes());
+            System.out.println("Forwarding chunk to " + nextNode);
         }
     }
 

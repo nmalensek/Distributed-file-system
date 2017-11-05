@@ -37,10 +37,7 @@ public class ProcessHeartbeats {
 
         nodeMap.put(information.getNodeInfo(), newNode);
 
-        ControllerHeartbeatThread heartbeatThread =
-                new ControllerHeartbeatThread(chunkServerSocket, information.getNodeInfo(), nodeMap, nodeChunksMap);
-        heartbeatThread.start();
-        heartbeatThreads.put(information.getNodeInfo(), heartbeatThread);
+        startHeartbeats(chunkServerSocket, information.getNodeInfo(), nodeMap, nodeChunksMap);
     }
 
     public synchronized void processMinorHeartbeat(ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
@@ -52,10 +49,12 @@ public class ProcessHeartbeats {
             updateNodeRecord(nodes.get(heartbeat.getNodeInfo()), heartbeat.getFreeSpace(),
                     heartbeat.getNumChunks());
                 processChunkData(newChunksMetadata, nodes, nodeChunksMap, heartbeat.getNodeInfo());
-        } else { //Controller is recovering, request major heartbeat
+        } else { //Controller is recovering, request major heartbeat from and restart heartbeats to chunk servers
 
             NodeRecord nodeInOverlay = registerNodeData(heartbeat.getNodeInfo(), heartbeat.getFreeSpace());
             nodes.put(heartbeat.getNodeInfo(), nodeInOverlay);
+
+            startHeartbeats(nodeInOverlay.getNodeSocket(), nodeInOverlay.toString(), nodes, nodeChunksMap);
 
             RequestMajorHeartbeat heartbeatRequest = new RequestMajorHeartbeat();
             sender.send(nodeInOverlay.getNodeSocket(), heartbeatRequest.getBytes());
@@ -80,7 +79,7 @@ public class ProcessHeartbeats {
                                                ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunks,
                                                String nodeID) {
         if (messageData.isEmpty()) { return; }
-        System.out.println(messageData);
+//        System.out.println(messageData);
         String[] splitDataIntoChunks = messageData.split(",");
         for (String data : splitDataIntoChunks) {
 
@@ -130,6 +129,15 @@ public class ProcessHeartbeats {
 
     public HashMap<String, ControllerHeartbeatThread> getHeartbeatThreads() {
         return heartbeatThreads;
+    }
+
+    private synchronized void startHeartbeats(Socket serverSocket, String hostPort,
+                                              ConcurrentHashMap<String, NodeRecord> nodeMap,
+                                              ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap) {
+        ControllerHeartbeatThread heartbeatThread =
+                new ControllerHeartbeatThread(serverSocket, hostPort, nodeMap, nodeChunksMap);
+        heartbeatThread.start();
+        heartbeatThreads.put(hostPort, heartbeatThread);
     }
 
     //    private void sendTestResponse(Socket socket) throws IOException {

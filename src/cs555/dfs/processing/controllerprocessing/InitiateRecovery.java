@@ -57,6 +57,7 @@ public class InitiateRecovery {
                 break;
             }
         }
+        if (replicationAddress.isEmpty()) {return;} //no eligible destinations
         try {
             String holderAddress = nodesWithChunks.get(0);
             ReadFileInquiry recoverChunk = new ReadFileInquiry();
