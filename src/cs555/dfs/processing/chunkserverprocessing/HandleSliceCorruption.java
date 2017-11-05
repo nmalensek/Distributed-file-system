@@ -23,7 +23,7 @@ public class HandleSliceCorruption {
         int maximum = chunkBytes.length;
         int writeSize = sliceSize;
 
-        System.out.println("Overwriting good bytes");
+        System.out.println("Re-writing good bytes");
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -62,6 +62,7 @@ public class HandleSliceCorruption {
                 break;
             }
         }
+
         prepareAndSendSliceRequest(thisNodeID, corruptedChunkName, corruptedSliceNumber, chunkHolder, originalRequester);
     }
 
@@ -73,6 +74,7 @@ public class HandleSliceCorruption {
 
         Socket holderSocket = new Socket(splitter.getHost(chunkHolder), splitter.getPort(chunkHolder));
 
+        System.out.println("Requesting uncorrupted slices from " + chunkHolder);
         TCPSender sender = new TCPSender();
         sender.send(holderSocket, chunkRequest.getBytes());
     }

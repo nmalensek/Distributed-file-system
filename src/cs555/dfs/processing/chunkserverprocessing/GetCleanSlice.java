@@ -60,7 +60,7 @@ public class GetCleanSlice {
         TCPSender sender = new TCPSender();
         Socket requesterConnection = new Socket(split.getHost(requestingServer), split.getPort(requestingServer));
         sender.send(requesterConnection, cleanSlices.getBytes());
-        System.out.println("Sent new version of slice " + sliceNumber);
+        System.out.println("Sent new version of all slices from slice " + sliceNumber + " onward");
 
         Disconnect dc = new Disconnect();
         sender.send(requesterConnection, dc.getBytes());
