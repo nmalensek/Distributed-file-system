@@ -100,8 +100,8 @@ public class ChunkServer implements Node {
             retrieveChunk.retrieveChunk(((ReadFileInquiry) event), this);
         } else if (event instanceof RequestChunk) {
             GetCleanSlice getCleanSlice = new GetCleanSlice((RequestChunk) event);
-//            getCleanSlice.retrieveCleanSlice(((RequestChunk) event).getChunkServerAddress().split("::")[1]);
-            getCleanSlice.retrieveCleanChunk(((RequestChunk) event).getChunkServerAddress().split("::")[1]);
+            getCleanSlice.retrieveCleanSlice(((RequestChunk) event).getChunkServerAddress().split("::")[1]);
+//            getCleanSlice.retrieveCleanChunk(((RequestChunk) event).getChunkServerAddress().split("::")[1]);
         } else if (event instanceof CleanSlices) {
             retrieveChunk.writeSlices((CleanSlices) event);
             updateMetaData((CleanSlices) event);

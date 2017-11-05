@@ -81,8 +81,8 @@ public class HandleSliceCorruption {
         String chunk = cleanSlices.getChunkName();
         byte[] sliceBytes = cleanSlices.getSlicesByteArray();
 
-//        try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunk, true)) {
-        try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunk)) {
+        try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunk, true)) {
+//        try(FileOutputStream fileOutputStream = new FileOutputStream(storageDirectory + chunk)) {
             fileOutputStream.write(sliceBytes);
         }
     }

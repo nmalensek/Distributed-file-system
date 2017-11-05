@@ -32,7 +32,7 @@ public class GetCleanSlice {
         if (sliceNumber == 0) {
             byteStartIndex = 0;
         } else {
-            byteStartIndex = (sliceSize * sliceNumber) - 1;
+            byteStartIndex = (sliceSize * sliceNumber);
         }
     }
 
@@ -66,21 +66,21 @@ public class GetCleanSlice {
         sender.send(requesterConnection, dc.getBytes());
     }
 
-    public synchronized void retrieveCleanChunk(String clientID) throws IOException {
-
-        byte[] chunkBytes = new byte[chunkSize];
-        int bytesRead;
-        try (FileInputStream fileInputStream = new FileInputStream(storageDirectory + chunkName)) {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-            while ((bytesRead = fileInputStream.read(chunkBytes)) != -1) {
-                byteArrayOutputStream.write(chunkBytes, 0, bytesRead);
-            }
-            chunkBytes = byteArrayOutputStream.toByteArray();
-            byteArrayOutputStream.reset();
-        }
-
-        sendSlices(chunkBytes, clientID);
-    }
+//    public synchronized void retrieveCleanChunk(String clientID) throws IOException {
+//
+//        byte[] chunkBytes = new byte[chunkSize];
+//        int bytesRead;
+//        try (FileInputStream fileInputStream = new FileInputStream(storageDirectory + chunkName)) {
+//            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//
+//            while ((bytesRead = fileInputStream.read(chunkBytes)) != -1) {
+//                byteArrayOutputStream.write(chunkBytes, 0, bytesRead);
+//            }
+//            chunkBytes = byteArrayOutputStream.toByteArray();
+//            byteArrayOutputStream.reset();
+//        }
+//
+//        sendSlices(chunkBytes, clientID);
+//    }
 
 }
