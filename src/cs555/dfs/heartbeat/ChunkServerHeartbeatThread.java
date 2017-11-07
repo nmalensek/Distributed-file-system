@@ -59,16 +59,20 @@ public class ChunkServerHeartbeatThread extends Thread {
 
     private String getAllChunks() throws IOException {
         StringBuilder allChunksBuilder = new StringBuilder();
-        File metadataFile = new File(metadataFilepath);
+        try {
+            File metadataFile = new File(metadataFilepath);
 
-        BufferedReader reader = new BufferedReader(new FileReader(metadataFile));
+            String line;
+            try (BufferedReader reader = new BufferedReader(new FileReader(metadataFile))) {
+                while ((line = reader.readLine()) != null) {
+                    allChunksBuilder.append(line).append(",");
+                }
+            }
 
-        String line;
-        while ((line = reader.readLine()) != null) {
-            allChunksBuilder.append(line).append(",");
+            return allChunksBuilder.toString();
+        } catch (FileNotFoundException fnfe) {
+            return "";
         }
-
-        return allChunksBuilder.toString();
     }
 
     private void tryToReconnect() {
@@ -99,6 +103,7 @@ public class ChunkServerHeartbeatThread extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+//                e.printStackTrace();
                 System.out.println("Could not contact Controller Node. Trying to reconnect on next heartbeat...");
                 try {
                     controllerSocket.close();
