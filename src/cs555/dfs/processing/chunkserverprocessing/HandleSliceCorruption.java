@@ -16,7 +16,15 @@ import static cs555.dfs.util.Constants.storageDirectory;
 
 public class HandleSliceCorruption {
     private Splitter splitter = new Splitter();
+    private String alreadyAskedNode;
 
+    /**
+     * Rewrites all good bytes up until the corrupted slice
+     * @param chunkBytes all current bytes, including the corrupted ones
+     * @param corruptedSliceNumber the slice number containing the corruption
+     * @param chunkName corrupted chunk's name
+     * @throws IOException
+     */
     public synchronized void overWriteGoodSlices(byte[] chunkBytes, int corruptedSliceNumber, String chunkName)
             throws IOException {
         int index = 0;
@@ -39,6 +47,15 @@ public class HandleSliceCorruption {
         }
     }
 
+    /**
+     * Creates and sends a new RequestChunk message.
+     * @param controllerSender TCPSender instance
+     * @param chunkName name of chunk to find.
+     * @param sourceServer the server holding the original chunk (this chunk server).
+     * @param controllerSocket controller node socket.
+     * @param clientID the client that originally requested the chunk.
+     * @throws IOException
+     */
     public synchronized void requestChunkLocation(TCPSender controllerSender,
                                                   String chunkName,
                                                   String sourceServer,
@@ -50,6 +67,17 @@ public class HandleSliceCorruption {
         controllerSender.send(controllerSocket, requestChunk.getBytes());
     }
 
+    /**
+     * Upon receiving the location of an uncorrupted chunk, requests uncorrupted slices from that server.
+     * The method takes note of which server is being asked for the clean slices just in case
+     * that server's slices are corrupted as well. As the method is written now, the requesting server
+     * will alternate between "recovery" servers when there are three file replications.
+     * @param message contains chunk location information.
+     * @param thisNodeID node that requested the chunk (this chunk server)
+     * @param corruptedChunkName name of chunk to replace.
+     * @param corruptedSliceNumber slice where corruption occurred.
+     * @throws IOException
+     */
     public synchronized void requestChunkFromServer(NodeInformation message, String thisNodeID, String corruptedChunkName,
                                                     int corruptedSliceNumber) throws IOException {
         String originalRequester = message.getNodeInfo().split("::")[0];
@@ -57,8 +85,9 @@ public class HandleSliceCorruption {
         String[] chunkLocations = serverAddresses.split(",");
         String chunkHolder = "";
         for (String nodeID : chunkLocations) {
-            if (!nodeID.equals(thisNodeID)) {
+            if (!nodeID.equals(thisNodeID) && !nodeID.equals(alreadyAskedNode)) {
                 chunkHolder = nodeID;
+                alreadyAskedNode = nodeID;
                 break;
             }
         }

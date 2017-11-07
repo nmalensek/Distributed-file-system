@@ -26,6 +26,12 @@ public class ProcessChunk {
         this.storageDirectory = storageDirectory;
     }
 
+    /**
+     * For a given chunk, the method writes bytes to local storage, calls writeMetadata method,
+     * and forwards the chunk information to the next destination node (if applicable).
+     * @param chunkInformation information, including bytes, of a new chunk.
+     * @throws IOException
+     */
     public synchronized void writeAndLogChunk(Chunk chunkInformation) throws IOException {
         String fullFileName = chunkInformation.getFileName();
         String originalFileName = fullFileName.substring(0, fullFileName.lastIndexOf('_'));
@@ -44,6 +50,11 @@ public class ProcessChunk {
         System.out.println("Got chunk " + fullFileName);
     }
 
+    /**
+     * Writes out metadata to metadata file, adding a newline at the end of the metadata string.
+     * @param metadata a pre-formed metadata string.
+     * @throws IOException
+     */
     private synchronized void writeMetadata(String metadata) throws IOException {
         File metadataFolder = new File(storageDirectory);
         metadataFolder.mkdirs();

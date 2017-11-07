@@ -83,6 +83,14 @@ public class Client implements Node {
         }
     }
 
+    /**
+     * Sends a byte array and metadata information for the next chunk in the chunkList
+     * to the node specified in the information parameter. If the chunkList is not empty,
+     * the destination for the next chunk in the queue is requested. If all chunks have
+     * been sent, the chunkNumber is reset to 1 so future chunk counts are accurate.
+     * @param information NodeInformation message containing the address the chunk should be sent to.
+     * @throws IOException
+     */
     private void sendChunk(NodeInformation information) throws IOException {
         chunkProcessor.sendChunk(information, chunkNumber, file.getName(), this);
         if (!chunkList.isEmpty()) {
@@ -96,6 +104,12 @@ public class Client implements Node {
         }
     }
 
+    /**
+     * Contacts chunk server(s) given by the controller node to request the chunk(s) of the
+     * user-specified file that each chunk server holds.
+     * @param information address(es) of the node(s) holding the chunks of the user-specified file.
+     * @throws IOException
+     */
     private void requestChunks(NodeInformation information) throws IOException {
         if (information.getNodeInfo().isEmpty()) {
             System.out.println("Controller could not locate file, please re-enter.");
@@ -132,6 +146,11 @@ public class Client implements Node {
         }
     }
 
+    /**
+     * Writes all chunks in the receivedChunks map to a file. Called when the client receives all
+     * chunks of a file from the chunk servers.
+     * @throws IOException
+     */
     private void mergeChunks() throws IOException {
         File dir = new File(retrievalDirectory);
         dir.mkdirs();

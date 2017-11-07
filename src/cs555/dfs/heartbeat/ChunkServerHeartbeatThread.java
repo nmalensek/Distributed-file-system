@@ -43,6 +43,10 @@ public class ChunkServerHeartbeatThread extends Thread {
         controllerMessage.send(controllerSocket, majorHeartbeatMessage.getBytes());
     }
 
+    /**
+     * Gets all new chunks that the parent chunk has stored since the last minor heartbeat.
+     * @return
+     */
     private String getNewChunks() {
         synchronized (owner.getNewChunksResponsibleFor()) {
             StringBuilder chunkBuilder = new StringBuilder();
@@ -57,6 +61,11 @@ public class ChunkServerHeartbeatThread extends Thread {
         }
     }
 
+    /**
+     * Reads metadata file and returns comma-separated metadata for all files the chunk server holds
+     * @return metadata in the form chunkName:version#:filename:lastUpdateTimestamp
+     * @throws IOException
+     */
     private String getAllChunks() throws IOException {
         StringBuilder allChunksBuilder = new StringBuilder();
         try {
@@ -75,6 +84,9 @@ public class ChunkServerHeartbeatThread extends Thread {
         }
     }
 
+    /**
+     * Tries to reconnect to the controller node location specified on the parent chunk server's startup.
+     */
     private void tryToReconnect() {
         try {
             controllerSocket = new Socket(owner.getControllerHost(), owner.getControllerPort());
