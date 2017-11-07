@@ -95,6 +95,15 @@ public class HandleSliceCorruption {
         prepareAndSendSliceRequest(thisNodeID, corruptedChunkName, corruptedSliceNumber, chunkHolder, originalRequester);
     }
 
+    /**
+     * Sends a request for uncorrupted slices from the server selected in the requestChunkFromServer method
+     * @param thisNodeID this node (home of the corrupted slice)
+     * @param corruptedChunkName name of corrupted chunk
+     * @param corruptedSliceNumber which slice is corrupted
+     * @param chunkHolder the server that's holding another copy of the specified chunk
+     * @param clientID the client that originally requested the file.
+     * @throws IOException
+     */
     private synchronized void prepareAndSendSliceRequest(String thisNodeID, String corruptedChunkName, int corruptedSliceNumber,
                                                          String chunkHolder, String clientID) throws IOException {
         RequestChunk chunkRequest = new RequestChunk();
@@ -108,6 +117,11 @@ public class HandleSliceCorruption {
         sender.send(holderSocket, chunkRequest.getBytes());
     }
 
+    /**
+     * Appends newly received slices of a file to the existing file.
+     * @param cleanSlices
+     * @throws IOException
+     */
     public synchronized void writeCleanSlices(CleanSlices cleanSlices) throws IOException {
         String chunk = cleanSlices.getChunkName();
         byte[] sliceBytes = cleanSlices.getSlicesByteArray();

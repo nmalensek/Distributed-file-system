@@ -36,6 +36,11 @@ public class GetCleanSlice {
         }
     }
 
+    /**
+     * Retrieves all slices from the specified corrupted slice onward from disk.
+     * @param clientID the original client that requested the file.
+     * @throws IOException
+     */
     public synchronized void retrieveCleanSlice(String clientID) throws IOException {
         System.out.println("Getting requested slice");
 
@@ -49,6 +54,12 @@ public class GetCleanSlice {
         }
     }
 
+    /**
+     * Send clean slices of file to requesting server.
+     * @param sliceArray byte array of requested uncorrupted slices.
+     * @param originalClient the client that originally requested the chunk.
+     * @throws IOException
+     */
     private synchronized void sendSlices(byte[] sliceArray, String originalClient) throws IOException {
         System.out.println("Preparing message for " + requestingServer + " so it can send to " + originalClient);
         CleanSlices cleanSlices = new CleanSlices();
