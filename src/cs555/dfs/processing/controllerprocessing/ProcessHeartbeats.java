@@ -56,6 +56,7 @@ public class ProcessHeartbeats {
 
             startHeartbeats(nodeInOverlay.getNodeSocket(), nodeInOverlay.toString(), nodes, nodeChunksMap);
 
+            System.out.println("No record of node, requesting major heartbeat from " + heartbeat.getNodeInfo());
             RequestMajorHeartbeat heartbeatRequest = new RequestMajorHeartbeat();
             sender.send(nodeInOverlay.getNodeSocket(), heartbeatRequest.getBytes());
         }
