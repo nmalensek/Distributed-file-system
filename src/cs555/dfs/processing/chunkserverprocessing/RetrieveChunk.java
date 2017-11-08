@@ -25,6 +25,14 @@ public class RetrieveChunk {
     private boolean corrupted = false;
     private HandleSliceCorruption handleCorruption = new HandleSliceCorruption();
 
+    /**
+     * Upon receiving a readFileInquiry, retrieve the requested chunk from disk.
+     * Checksums are calculated for the retrieved bytes and compared against the checksums
+     * that were stored on disk. If a corruption is detected, corruption handling is initiated.
+     * @param chunkRequest message containing the details of the chunk to retrieve.
+     * @param parent the server that received the request for a chunk.
+     * @throws IOException
+     */
     public synchronized void retrieveChunk(ReadFileInquiry chunkRequest, ChunkServer parent) throws IOException {
         this.parent = parent;
         String chunkName = chunkRequest.getFilename();
@@ -66,6 +74,12 @@ public class RetrieveChunk {
         }
     }
 
+    /**
+     * Checks checksums of the current requested chunk
+     * @param retrievedChunk byte array of chunks retrieved from disk.
+     * @param chunkName name of the chunk retrieved.
+     * @throws IOException
+     */
     private synchronized void checkChunkSlices(byte[] retrievedChunk, String chunkName) throws IOException {
 
         ArrayList<String> writtenHashes = getLoggedIntegrityData(chunkName);
@@ -81,6 +95,12 @@ public class RetrieveChunk {
         }
     }
 
+    /**
+     * Gets checksums that were recorded on disk.
+     * @param chunkName name of chunk to check.
+     * @return
+     * @throws IOException
+     */
     private synchronized ArrayList<String> getLoggedIntegrityData(String chunkName) throws IOException {
 
         ArrayList<String> loggedIntegrityData = new ArrayList<>();
@@ -95,6 +115,11 @@ public class RetrieveChunk {
         return loggedIntegrityData;
     }
 
+    /**
+     * Gets checksums of bytes that are currently on disk.
+     * @param retrievedChunk chunk that has been requested.
+     * @return
+     */
     private synchronized ArrayList<String> getCurrentIntegrityHashes(byte[] retrievedChunk) {
 
         ArrayList<String> currentIntegrityData = new ArrayList<>();
@@ -119,6 +144,11 @@ public class RetrieveChunk {
         handleCorruption.requestChunkFromServer(message, nodeID, corruptedChunkName, corruptedSlice);
     }
 
+    /**
+     * Writes out received slices and re-checks that the new slices are not corrupted.
+     * @param message
+     * @throws IOException
+     */
     public synchronized void writeSlices(CleanSlices message) throws IOException {
         handleCorruption.writeCleanSlices(message);
         ReadFileInquiry inquiry = new ReadFileInquiry();

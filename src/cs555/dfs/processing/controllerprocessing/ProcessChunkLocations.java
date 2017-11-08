@@ -21,6 +21,12 @@ public class ProcessChunkLocations {
         this.nodeMap = nodeMap;
     }
 
+    /**
+     * Finds and sends locations of requested chunks.
+     * @param message message that contains details of the requested chunk.
+     * @param controllerSender instance of TCPSender.
+     * @throws IOException
+     */
     public void sendChunkLocations(RequestChunk message, TCPSender controllerSender) throws IOException {
         String chunkName = message.getChunkName();
         String fileName = chunkName.substring(0, chunkName.lastIndexOf('_'));

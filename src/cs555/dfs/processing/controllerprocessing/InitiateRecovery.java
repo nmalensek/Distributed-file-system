@@ -21,6 +21,12 @@ public class InitiateRecovery {
     private TCPSender recoverySender = new TCPSender();
     private ArrayList<String> nodesWithChunks;
 
+    /**
+     * Removes chunk server from all node maps.
+     * @param nodeMap map of nodes in the overlay.
+     * @param nodeChunksMap map of which nodes hold which chunks.
+     * @param nodeID ID of node that failed.
+     */
     public void removeChunkServer(ConcurrentHashMap<String, NodeRecord> nodeMap,
                                   ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
                                   String nodeID) {
@@ -33,6 +39,13 @@ public class InitiateRecovery {
 
     }
 
+    /**
+     * Removes failed chunk server from overlay.
+     * @param nodeChunksMap
+     * @param fileName
+     * @param chunkName
+     * @param nodeID
+     */
     private void removeFromChunksMap(ConcurrentHashMap<String, ConcurrentHashMap<String, List<String>>> nodeChunksMap,
                                      String fileName, String chunkName, String nodeID) {
         ConcurrentHashMap<String, List<String>> chunkMap = nodeChunksMap.get(fileName);
@@ -48,6 +61,12 @@ public class InitiateRecovery {
         }
     }
 
+    /**
+     * Requests that servers that hold replicas of the chunks that were on the server that failed
+     * send new copies to another server in the overlay.
+     * @param destinations potential destinations for new replicas.
+     * @param chunkName name of chunk.
+     */
     private void replicateFile(String destinations, String chunkName) {
         String[] destinationAddresses = destinations.split(",");
         String replicationAddress = "";
