@@ -1,4 +1,4 @@
-# Distributed-file-system
+# Distributed file system
 
 Client process takes in the path of a file, then the file is chunked and distributed across chunk servers based on locations given by the Controller Node. Chunk Servers detect alterations to files when a read request for the file is submitted and then request new, unaltered portions of the affected file.
 
