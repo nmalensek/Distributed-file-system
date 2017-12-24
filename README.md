@@ -6,4 +6,4 @@ To do:
 * rework behavior when file corruption's detected (request copy from another chunk server instead of failing)
 * add number of held chunks as another consideration in addition to free disk space when deciding where files should go
 
-*~~rework file reconstruction so chunks are directly appended to new file~~
+* ~~rework file reconstruction so chunks are directly appended to new file~~
