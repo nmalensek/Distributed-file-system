@@ -65,14 +65,14 @@ public class ClientChunkProcessor {
             nextNodes.append(destinationNodes[i]).append(",");
         }
         chunk.setReplicationNodes(nextNodes.toString());
-        chunk.setFileName(filename + "_chunk" + chunkNumber);
+        chunk.setFileName(filename + "_chunk-" + chunkNumber);
         chunk.setChunkByteArray(chunkList.remove());
 
         try {
             Socket destinationSocket = new Socket(Splitter.getHost(destinationNodes[0]), Splitter.getPort(destinationNodes[0]));
             chunkSender.send(destinationSocket, chunk.getBytes());
             System.out.println("Sent " + chunk.getFileName() + " to " + destinationNodes[0]);
-            client.setChunkNumber(chunkNumber + 1);
+            client.setSentChunkNumber(chunkNumber + 1);
             Disconnect dc = new Disconnect();
             chunkSender.send(destinationSocket, dc.getBytes());
         } catch (IOException ioe) {
