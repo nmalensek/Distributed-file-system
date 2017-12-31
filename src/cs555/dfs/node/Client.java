@@ -13,9 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static cs555.dfs.util.Constants.retrievalDirectory;
 
@@ -33,7 +31,7 @@ public class Client implements Node {
     private String filenameToRead;
     private LinkedList<byte[]> chunkList = new LinkedList<>();
     private ClientChunkProcessor chunkProcessor = new ClientChunkProcessor(chunkList, controllerNodeSocket);
-    private TreeMap<String, String> chunkLocationMap = new TreeMap<>();
+    private TreeMap<String, List<String>> chunkLocationMap = new TreeMap<>();
     private int sentChunkNumber = 1;
     private int totalChunks;
     private int receivedChunkNumber = 0;
@@ -82,15 +80,6 @@ public class Client implements Node {
             } else {
                 requestNextChunk();
             }
-//            synchronized (receivedChunks) {
-//                receivedChunks.put(((Chunk) event).getFileName(), ((Chunk) event).getChunkByteArray());
-//                System.out.println(receivedChunks.size() + " chunks of " + ((Chunk) event).getFileName());
-//                if (receivedChunks.keySet().size() == totalChunks) {
-//                    System.out.println("Got all requested chunks, merging...");
-//                    writeChunk();
-//                    receivedChunks.clear();
-//                }
-//            }
         }
     }
 
@@ -126,17 +115,19 @@ public class Client implements Node {
             System.out.println("Controller could not locate file, please re-enter.");
             return;
         }
+        //50chunks#!#chunkName:-:host:port|host:port|host:port|,,chunkName:-:host:port|host:port|host:port,,
         String[] numChunksPlusChunks = chunkLocations.getNodeInfo().split("#!#");
         totalChunks = Integer.parseInt(numChunksPlusChunks[0]);
         System.out.println(totalChunks);
         String[] chunkNamePlusLocation = numChunksPlusChunks[1].split(",,");
         System.out.println(chunkLocations.getNodeInfo());
 
-        for (String nameAndLocation : chunkNamePlusLocation) {
-            String chunkName = nameAndLocation.split(":-:")[0];
-            String hostPort = nameAndLocation.split(":-:")[1];
+        for (String nameAndLocations : chunkNamePlusLocation) {
+            String chunkName = nameAndLocations.split(":-:")[0];
+            String locations = nameAndLocations.split(":-:")[1];
+            List<String> hostPortList = new ArrayList<>(Arrays.asList(locations.split("\\|")));
 
-            chunkLocationMap.put(chunkName, hostPort);
+            chunkLocationMap.put(chunkName, hostPortList);
         }
 
         requestNextChunk();
@@ -144,29 +135,38 @@ public class Client implements Node {
     }
 
     private void requestNextChunk() throws IOException {
-        Map.Entry<String, String> nextChunk = chunkLocationMap.firstEntry();
+        Map.Entry<String, List<String>> nextChunk = chunkLocationMap.firstEntry();
+        int index = 0;
+        boolean requestSuccessful = false;
 
-        ReadFileInquiry requestChunk = new ReadFileInquiry();
-        requestChunk.setClientAddress(thisNodeID);
-        requestChunk.setFilename(nextChunk.getKey());
+        while (!requestSuccessful) {
+            ReadFileInquiry requestChunk = new ReadFileInquiry();
+            requestChunk.setClientAddress(thisNodeID);
+            requestChunk.setFilename(nextChunk.getKey());
 
-        try {
-            Socket chunkServerSocket = new Socket(Splitter.getHost(nextChunk.getValue()), Splitter.getPort(nextChunk.getValue()));
-            clientSender.send(chunkServerSocket, requestChunk.getBytes());
-            chunkLocationMap.remove(nextChunk.getKey());
-        } catch (IOException e) {
-//            ChunkServerDown chunkServerDown = new ChunkServerDown();
-//            chunkServerDown.setNodeInfo(nextChunk.getValue());
-//            clientSender.send(controllerNodeSocket, chunkServerDown.getBytes());
-//            System.out.println("Unable to request chunks from " + nextChunk.getValue() + ", controller has been notified.");
-//            System.out.println("Request aborted, please re-submit.");
-//            synchronized (receivedChunks) {
-//                receivedChunks.clear();
-//            }
+            try {
+                Socket chunkServerSocket = new Socket(
+                        Splitter.getHost(nextChunk.getValue().get(index)), Splitter.getPort(nextChunk.getValue().get(index)));
+                clientSender.send(chunkServerSocket, requestChunk.getBytes());
+                chunkLocationMap.remove(nextChunk.getKey());
+                requestSuccessful = true;
+            } catch (IOException e) {
+                ChunkServerDown chunkServerDown = new ChunkServerDown();
+                chunkServerDown.setNodeInfo(nextChunk.getValue().get(index));
+                clientSender.send(controllerNodeSocket, chunkServerDown.getBytes());
+                System.out.println("Unable to request chunks from " + nextChunk.getValue() + ", controller has been notified.");
+                System.out.println("Chunk will be requested from secondary location.");
+                index++;
+                if (index > 2) {
+                    System.out.println("No servers holding requested chunk responded, aborting chunk retrieval.");
+                    chunkLocationMap.clear();
+                    break;
+                }
+            }
         }
     }
 
-    private void deleteFileIfExists() throws IOException {
+    private void deleteFileIfExists() {
         File mergedFile = new File(retrievalDirectory + filenameToRead);
         if (mergedFile.exists()) { mergedFile.delete(); }
     }

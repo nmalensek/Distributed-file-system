@@ -1,9 +1,6 @@
 package cs555.dfs.processing.controllerprocessing;
 
-import cs555.dfs.messages.NodeInformation;
-import cs555.dfs.messages.Protocol;
-import cs555.dfs.messages.ReadFileInquiry;
-import cs555.dfs.messages.WriteFileInquiry;
+import cs555.dfs.messages.*;
 import cs555.dfs.node.NodeRecord;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.util.DetermineTopThree;
@@ -58,6 +55,10 @@ public class ProcessInquiries {
             locations.append(chunkName)
                     .append(":-:")
                     .append(chunkLocations.get(chunkName).get(0))
+                    .append("|")
+                    .append(chunkLocations.get(chunkName).get(1))
+                    .append("|")
+                    .append(chunkLocations.get(chunkName).get(2))
                     .append(",,");
         }
         System.out.println(locations.toString());
