@@ -5,7 +5,7 @@ Client process takes in the path of a file, then the file is chunked and distrib
 Note: client's currently in "debug" mode; testing file and filepath are hardcoded instead of allowing user input.
 
 To do: 
-* rework behavior when file corruption's detected (request copy from another chunk server instead of failing)
+* ~~rework behavior when file corruption's detected (request copy from another chunk server instead of failing)~~
 * add number of held chunks as another consideration in addition to free disk space when deciding where files should go
 
 * ~~rework file reconstruction so chunks are directly appended to new file~~
