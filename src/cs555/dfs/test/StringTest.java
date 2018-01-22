@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.TreeMap;
 
 public class StringTest {
@@ -89,6 +90,20 @@ public class StringTest {
         System.out.println(testList.toString());
     }
 
+    private void stringJoinTest() {
+        StringJoiner stringJoiner = new StringJoiner(",");
+        List<String> testList = new ArrayList<>();
+        testList.add("test1:1234");
+        testList.add("test2:1235534");
+        testList.add("test3:12554");
+
+        for (int i = 0; i < testList.size(); i++) {
+            stringJoiner.add(testList.get(i));
+        }
+
+        System.out.println(stringJoiner.toString());
+    }
+
     public static void main(String[] args) throws IOException {
         StringTest stringTest = new StringTest();
 //        stringTest.test();
@@ -96,6 +111,7 @@ public class StringTest {
 //        stringTest.sliceTest("abcdefghijklmnopqrstuvxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890");
 //        stringTest.splitTest();
 //        stringTest.treeMapTest();
-        stringTest.listTest();
+//        stringTest.listTest();
+        stringTest.stringJoinTest();
     }
 }

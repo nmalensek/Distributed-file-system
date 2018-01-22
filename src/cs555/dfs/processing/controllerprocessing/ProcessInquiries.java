@@ -52,14 +52,12 @@ public class ProcessInquiries {
         locations.append("#!#");
 
         for (String chunkName : chunkLocations.keySet()) {
-            locations.append(chunkName)
-                    .append(":-:")
-                    .append(chunkLocations.get(chunkName).get(0))
-                    .append("|")
-                    .append(chunkLocations.get(chunkName).get(1))
-                    .append("|")
-                    .append(chunkLocations.get(chunkName).get(2))
-                    .append(",,");
+            locations.append(chunkName).append(":-:");
+            for (int i = 0; i < chunkLocations.get(chunkName).size(); i++) {
+                locations.append(chunkLocations.get(chunkName).get(i))
+                        .append("|");
+            }
+            locations.append(",,");
         }
         System.out.println(locations.toString());
         return locations.toString();

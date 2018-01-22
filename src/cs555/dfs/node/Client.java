@@ -2,6 +2,7 @@ package cs555.dfs.node;
 
 import cs555.dfs.messages.*;
 import cs555.dfs.processing.clientprocessing.ClientChunkProcessor;
+import cs555.dfs.processing.clientprocessing.ClientChunkReceiver;
 import cs555.dfs.transport.TCPSender;
 import cs555.dfs.transport.TCPServerThread;
 import cs555.dfs.util.Splitter;
@@ -31,9 +32,9 @@ public class Client implements Node {
     private String filenameToRead;
     private LinkedList<byte[]> chunkList = new LinkedList<>();
     private ClientChunkProcessor chunkProcessor = new ClientChunkProcessor(chunkList, controllerNodeSocket);
+    private ClientChunkReceiver chunkReceiver;
     private TreeMap<String, List<String>> chunkLocationMap = new TreeMap<>();
     private int sentChunkNumber = 1;
-    private int totalChunks;
     private int receivedChunkNumber = 0;
     private boolean controllerDown = false;
 
@@ -54,6 +55,7 @@ public class Client implements Node {
                 thisNodePort = clientServer.getPortNumber();
                 if (thisNodePort != 0) {
                     thisNodeID = thisNodeHost + ":" + thisNodePort;
+                    chunkReceiver = new ClientChunkReceiver(clientSender, thisNodeID, controllerNodeSocket);
                     break;
                 }
             } catch (NullPointerException ignored) {
@@ -68,18 +70,10 @@ public class Client implements Node {
             if (((NodeInformation) event).getInformationType() == Protocol.CHUNK_DESTINATION) {
                 sendChunk((NodeInformation) event);
             } else if (((NodeInformation) event).getInformationType() == Protocol.CHUNK_LOCATION) {
-                processChunkLocations((NodeInformation) event);
+                chunkReceiver.processChunkLocations((NodeInformation) event, chunkLocationMap);
             }
         } else if (event instanceof Chunk) {
-            //write and request next chunk
-            receivedChunkNumber++;
-            writeChunk(((Chunk) event).getChunkByteArray());
-            if (receivedChunkNumber == totalChunks) {
-                System.out.println("Got all requested chunks.");
-                receivedChunkNumber = 0;
-            } else {
-                requestNextChunk();
-            }
+            chunkReceiver.handleIncomingChunk((Chunk) event, filenameToRead, chunkLocationMap);
         }
     }
 
@@ -104,84 +98,9 @@ public class Client implements Node {
         }
     }
 
-    /**
-     * Contacts chunk server(s) given by the controller node to request the chunk(s) of the
-     * user-specified file that each chunk server holds.
-     * @param chunkLocations address(es) of the node(s) holding the chunks of the user-specified file.
-     * @throws IOException
-     */
-    private void processChunkLocations(NodeInformation chunkLocations) throws IOException {
-        if (chunkLocations.getNodeInfo().isEmpty()) {
-            System.out.println("Controller could not locate file, please re-enter.");
-            return;
-        }
-        //50chunks#!#chunkName:-:host:port|host:port|host:port|,,chunkName:-:host:port|host:port|host:port,,
-        String[] numChunksPlusChunks = chunkLocations.getNodeInfo().split("#!#");
-        totalChunks = Integer.parseInt(numChunksPlusChunks[0]);
-        System.out.println(totalChunks);
-        String[] chunkNamePlusLocation = numChunksPlusChunks[1].split(",,");
-        System.out.println(chunkLocations.getNodeInfo());
-
-        for (String nameAndLocations : chunkNamePlusLocation) {
-            String chunkName = nameAndLocations.split(":-:")[0];
-            String locations = nameAndLocations.split(":-:")[1];
-            List<String> hostPortList = new ArrayList<>(Arrays.asList(locations.split("\\|")));
-
-            chunkLocationMap.put(chunkName, hostPortList);
-        }
-
-        requestNextChunk();
-
-    }
-
-    private void requestNextChunk() throws IOException {
-        Map.Entry<String, List<String>> nextChunk = chunkLocationMap.firstEntry();
-        int index = 0;
-        boolean requestSuccessful = false;
-
-        while (!requestSuccessful) {
-            ReadFileInquiry requestChunk = new ReadFileInquiry();
-            requestChunk.setClientAddress(thisNodeID);
-            requestChunk.setFilename(nextChunk.getKey());
-
-            try {
-                Socket chunkServerSocket = new Socket(
-                        Splitter.getHost(nextChunk.getValue().get(index)), Splitter.getPort(nextChunk.getValue().get(index)));
-                clientSender.send(chunkServerSocket, requestChunk.getBytes());
-                chunkLocationMap.remove(nextChunk.getKey());
-                requestSuccessful = true;
-            } catch (IOException e) {
-                ChunkServerDown chunkServerDown = new ChunkServerDown();
-                chunkServerDown.setNodeInfo(nextChunk.getValue().get(index));
-                clientSender.send(controllerNodeSocket, chunkServerDown.getBytes());
-                System.out.println("Unable to request chunks from " + nextChunk.getValue() + ", controller has been notified.");
-                System.out.println("Chunk will be requested from secondary location.");
-                index++;
-                if (index > 2) {
-                    System.out.println("No servers holding requested chunk responded, aborting chunk retrieval.");
-                    chunkLocationMap.clear();
-                    break;
-                }
-            }
-        }
-    }
-
     private void deleteFileIfExists() {
         File mergedFile = new File(retrievalDirectory + filenameToRead);
         if (mergedFile.exists()) { mergedFile.delete(); }
-    }
-
-    /**
-     * Writes all chunks in the receivedChunks map to a file. Called when the client receives all
-     * chunks of a file from the chunk servers.
-     * @throws IOException
-     */
-    private void writeChunk(byte[] chunkBytes) throws IOException {
-        File dir = new File(retrievalDirectory);
-        dir.mkdirs();
-        try (FileOutputStream fileOutputStream = new FileOutputStream(retrievalDirectory + filenameToRead, true)) {
-            fileOutputStream.write(chunkBytes);
-        }
     }
 
     @Override
