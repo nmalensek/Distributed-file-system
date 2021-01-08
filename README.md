@@ -1,6 +1,6 @@
 # Distributed file system
 
-Client process takes in the path of a file, then the file is chunked and distributed across chunk servers based on locations given by the Controller Node. Chunk Servers detect alterations to files when a read request for the file is submitted and then request new, unaltered portions of the affected file.
+Client process takes in the path of a file, then the file is chunked and distributed across chunk servers based on locations given by the Controller Node. If file corruption occurs, Chunk Servers detect it and request the original portions of the affected file from other Chunk Servers that have copies.
 
 Note: client's currently in "debug" mode; testing file and filepath are hardcoded instead of allowing user input.
 
